@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +105,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(HABITS_TITLE, title);
-        values.put(HABITS_USER_ID, userId);  // ID пользователя, для которого сохраняется привычка
+        values.put(HABITS_USER_ID, userId);  // Используем userId для связи с пользователем
 
         long result = db.insert(HABITS_TABLE, null, values);
         db.close();
@@ -118,15 +119,50 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Запрос для получения привычек по userId
         Cursor cursor = db.rawQuery("SELECT * FROM " + HABITS_TABLE + " WHERE " + HABITS_USER_ID + " = ?", new String[]{String.valueOf(userId)});
 
+        if (cursor != null && cursor.moveToFirst()) {
+            // Получаем индекс столбца для HABITS_TITLE
+            int titleColumnIndex = cursor.getColumnIndex(HABITS_TITLE);
+            if (titleColumnIndex != -1) {  // Проверяем, что столбец существует
+                do {
+                    String title = cursor.getString(titleColumnIndex);
+                    habitList.add(new Habit(title));  // Добавляем привычку в список
+                } while (cursor.moveToNext());
+            } else {
+                // Обработка ошибки, если столбец не найден
+                Log.e("DatabaseError", "Column " + HABITS_TITLE + " not found.");
+            }
+        }
+
+        assert cursor != null;
+        cursor.close();
+        db.close();
+        return habitList;
+    }
+
+
+    public int getUserIdByEmail(String email) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT " + USERS_ID + " FROM " + USERS_TABLE + " WHERE email = ?", new String[]{email});
+
+        // Проверяем, найден ли столбец USERS_ID
+        int columnIndex = cursor.getColumnIndex(USERS_ID);
+        if (columnIndex == -1) {
+            // Выводим сообщение об ошибке, если столбец не найден
+            Log.e("DatabaseError", "Column " + USERS_ID + " not found.");
+            cursor.close();
+            db.close();
+            return -1;  // Столбец не найден
+        }
+
         if (cursor.moveToFirst()) {
-            do {
-                String title = cursor.getString(cursor.getColumnIndex(HABITS_TITLE));
-                habitList.add(new Habit(title));  // Добавляем привычку в список
-            } while (cursor.moveToNext());
+            int userId = cursor.getInt(columnIndex);
+            cursor.close();
+            db.close();
+            return userId;
         }
 
         cursor.close();
         db.close();
-        return habitList;
+        return -1;  // Если пользователь не найден
     }
 }

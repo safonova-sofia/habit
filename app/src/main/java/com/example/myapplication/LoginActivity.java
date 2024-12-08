@@ -67,11 +67,13 @@ public class LoginActivity extends AppCompatActivity {
         // Проверка в базе данных
         boolean isAuthenticated = databaseHelper.loginUser(email, password);
         if (isAuthenticated) {
-            // Сохранение состояния входа в SharedPreferences
+            // Сохранение информации о пользователе
+            int userId = databaseHelper.getUserIdByEmail(email);  // Предположим, что есть метод getUserIdByEmail
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
             SharedPreferences.Editor editor = prefs.edit();
-            editor.putBoolean(KEY_IS_LOGGED_IN, true);
-            editor.apply();  // Сохраняем информацию о том, что пользователь вошел
+            editor.putInt("user_id", userId); // Сохраняем userId
+            editor.putBoolean(KEY_IS_LOGGED_IN, true); // Флаг успешного входа
+            editor.apply();
 
             Toast.makeText(this, "Вход выполнен", Toast.LENGTH_SHORT).show();
             startMainActivity(); // Переход к MainActivity
@@ -79,6 +81,7 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(this, "Неверные данные или пользователь не существует", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     // Метод для перехода в MainActivity
     private void startMainActivity() {

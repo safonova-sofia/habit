@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.example.myapplication.LoginActivity.PREFS_NAME;
+
 public class HabitsFragment extends Fragment {
 
     private RecyclerView recyclerView;
@@ -22,8 +26,7 @@ public class HabitsFragment extends Fragment {
     private List<Habit> habitList;
     private Button createHabitButton;
     private DatabaseHelper databaseHelper;
-
-    private int userId = 1; // Замените на реальный userId, если необходимо
+    private int userId;
 
     @Nullable
     @Override
@@ -34,6 +37,16 @@ public class HabitsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.habitsRecyclerView);
         createHabitButton = view.findViewById(R.id.createHabitButton);
         databaseHelper = new DatabaseHelper(getContext());
+
+        // Загружаем userId из SharedPreferences
+        SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        userId = prefs.getInt("user_id", -1);  // Загружаем userId
+
+        // Проверяем, если userId не найден
+        if (userId == -1) {
+            // Можно обработать ошибку, если userId не найден (например, попросить повторно войти в систему)
+            return view;
+        }
 
         // Инициализация адаптера и RecyclerView
         habitList = databaseHelper.getHabitsByUserId(userId); // Загружаем привычки из базы данных
