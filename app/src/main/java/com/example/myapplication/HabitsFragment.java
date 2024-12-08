@@ -9,7 +9,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -82,15 +81,29 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
                 int position = viewHolder.getAdapterPosition();
                 Habit habit = habitList.get(position);
 
-                // Отметить привычку как выполненную
-                habit.setCompleted(true); // Обновляем статус выполнения в объекте Habit
-                databaseHelper.updateHabitStatus(habit.getId(), true); // Обновляем в базе данных
+                if (direction == ItemTouchHelper.RIGHT) {
+                    // Свайп вправо — отмечаем как выполненную
+                    habit.setCompleted(true); // Обновляем статус выполнения в объекте Habit
+                    habit.setBackgroundColor("#808080");  // Меняем цвет фона на серый
+                    databaseHelper.updateHabitStatus(habit.getId(), true); // Обновляем в базе данных
 
-                // Обновить адаптер и UI
-                habitList.remove(position);
-                adapter.notifyItemRemoved(position);
+                    // Перемещаем привычку в конец списка
+                    habitList.remove(position);
+                    habitList.add(habit);
+                    adapter.notifyItemMoved(position, habitList.size() - 1);  // Перемещаем элемент в конец
+                    Toast.makeText(getContext(), "Привычка отмечена как выполненная!", Toast.LENGTH_SHORT).show();
+                } else if (direction == ItemTouchHelper.LEFT) {
+                    // Свайп влево — отмечаем как невыполненную
+                    habit.setCompleted(false); // Обновляем статус выполнения в объекте Habit
+                    habit.setBackgroundColor("#FFFFFF");  // Меняем цвет фона на белый
+                    databaseHelper.updateHabitStatus(habit.getId(), false); // Обновляем в базе данных
 
-                Toast.makeText(getContext(), "Привычка отмечена как выполненная!", Toast.LENGTH_SHORT).show();
+                    // Перемещаем привычку обратно в список
+                    habitList.remove(position);
+                    habitList.add(0, habit);  // Добавляем в начало списка
+                    adapter.notifyItemMoved(position, 0);  // Перемещаем элемент в начало
+                    Toast.makeText(getContext(), "Привычка отменена!", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
@@ -101,11 +114,11 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
                 View itemView = viewHolder.itemView;
                 Paint paint = new Paint();
                 if (dX > 0) {
-                    // Свайп вправо — цвет зеленый (для выполненной привычки)
+                    // Свайп вправо — цвет серый
                     paint.setColor(Color.GREEN);
                     c.drawRect((float) itemView.getLeft(), (float) itemView.getTop(), dX, (float) itemView.getBottom(), paint);
                 } else {
-                    // Свайп влево — цвет красный (для отмены действия)
+                    // Свайп влево — цвет для отмены (например, красный)
                     paint.setColor(Color.RED);
                     c.drawRect((float) itemView.getRight() + dX, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom(), paint);
                 }
