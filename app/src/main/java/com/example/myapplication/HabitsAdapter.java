@@ -40,11 +40,11 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.HabitViewH
         // Устанавливаем цвет фона
         holder.itemView.setBackgroundColor(Color.parseColor(habit.getBackgroundColor()));  // Используем сохраненный цвет
 
-        // Устанавливаем фон в зависимости от выполнения привычки
+        // Устанавливаем прозрачность в зависимости от выполнения привычки
         if (habit.isCompleted()) {
-            holder.itemView.setAlpha(0.5f);  // Пример: полупрозрачный фон для выполненной привычки
+            holder.itemView.setAlpha(0.5f);  // Привычка выполнена - полупрозрачный фон
         } else {
-            holder.itemView.setAlpha(1f);  // Яркий фон для невыполненной привычки
+            holder.itemView.setAlpha(1f);  // Привычка не выполнена - яркий фон
         }
 
         holder.itemView.setOnClickListener(v -> listener.onHabitClick(habit));
