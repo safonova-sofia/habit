@@ -8,13 +8,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "habitTracker.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 8;
 
     // Таблицы
     public static final String USERS_TABLE = "users";
@@ -42,6 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String HISTORY_ID = "id";
     public static final String HISTORY_HABIT_ID = "habit_id";
     public static final String HISTORY_DATE = "date";
+    public static final String HISTORY_IS_COMPLETED = "is_completed"; // Столбец для статуса выполнения
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -72,21 +74,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + HISTORY_TABLE + " (" +
                 HISTORY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 HISTORY_HABIT_ID + " INTEGER, " +
-                HISTORY_DATE + " TEXT, " +
+                HISTORY_DATE + " TEXT, " +  // Новый столбец для даты выполнения
+                HISTORY_IS_COMPLETED + " INTEGER, " +  // Статус выполнения (0 - не выполнено, 1 - выполнено)
                 "FOREIGN KEY(" + HISTORY_HABIT_ID + ") REFERENCES " + HABITS_TABLE + "(" + HABITS_ID + "))");
     }
 
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 5) {
-            db.execSQL("ALTER TABLE " + HABITS_TABLE + " ADD COLUMN " + HABITS_DESCRIPTION + " TEXT");
-            db.execSQL("ALTER TABLE " + HABITS_TABLE + " ADD COLUMN " + HABITS_CREATED_AT + " TEXT");
-            db.execSQL("ALTER TABLE " + HABITS_TABLE + " ADD COLUMN " + HABITS_REPEAT_TYPE + " TEXT");
-            db.execSQL("ALTER TABLE " + HABITS_TABLE + " ADD COLUMN " + HABITS_DAYS_OF_WEEK + " TEXT");
-            db.execSQL("ALTER TABLE " + HABITS_TABLE + " ADD COLUMN " + HABITS_DAYS_OF_MONTH + " TEXT");
-        }
-        // Добавьте другие проверки для разных версий базы данных, если необходимо
+
     }
+
 
 
 
@@ -213,12 +211,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public boolean updateHabitStatus(int habitId, boolean isCompleted) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("is_completed", isCompleted ? 1 : 0);  // 1 для выполненной привычки, 0 для невыполненной
+        values.put(HABITS_IS_COMPLETED, isCompleted ? 1 : 0);
 
+        // Обновляем статус выполнения привычки в таблице habits
         int rowsUpdated = db.update(HABITS_TABLE, values, HABITS_ID + " = ?", new String[]{String.valueOf(habitId)});
         db.close();
-        return rowsUpdated > 0;  // Если обновлена хотя бы одна строка, возвращаем true
+
+        // Добавляем запись в таблицу history
+        boolean isHistoryAdded = addHistoryRecord(habitId, isCompleted);
+        return rowsUpdated > 0 && isHistoryAdded;  // Если обновлена хотя бы одна строка и запись добавлена в историю, возвращаем true
     }
+
 
     public boolean deleteHabit(int habitId) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -227,6 +230,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return rowsDeleted > 0;  // Если количество удаленных строк больше 0, значит удаление прошло успешно
     }
+
+    public boolean addHistoryRecord(int habitId, boolean isCompleted) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        // Получаем текущую дату
+        String currentDate = LocalDate.now().toString();  // Формат даты YYYY-MM-DD
+
+        // Добавляем запись в таблицу history
+        values.put(HISTORY_HABIT_ID, habitId);
+        values.put(HISTORY_DATE, currentDate);
+        values.put(HISTORY_IS_COMPLETED, isCompleted ? 1 : 0);  // 1 — выполнена, 0 — не выполнена
+
+        long result = db.insert(HISTORY_TABLE, null, values);
+        db.close();
+        return result != -1;  // Если результат -1, то произошла ошибка
+    }
+
+    public List<HistoryRecord> getHistoryByHabitId(int habitId) {
+        List<HistoryRecord> historyList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + HISTORY_TABLE + " WHERE " + HISTORY_HABIT_ID + " = ?", new String[]{String.valueOf(habitId)});
+
+        if (cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") String date = cursor.getString(cursor.getColumnIndex(HISTORY_DATE));
+                @SuppressLint("Range") boolean isCompleted = cursor.getInt(cursor.getColumnIndex(HISTORY_IS_COMPLETED)) == 1;
+                historyList.add(new HistoryRecord(date, isCompleted));  // Добавляем новую запись истории
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return historyList;
+    }
+
+
+
 
 
 

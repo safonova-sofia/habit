@@ -80,11 +80,9 @@ public class HistoryFragment extends Fragment {
     private Map<LocalDate, Integer> loadHabitCompletionData() {
         Map<LocalDate, Integer> data = new HashMap<>();
 
-        // Получаем все записи из таблицы HISTORY, чтобы подсчитать количество выполненных привычек для каждого дня
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT date, COUNT(*) FROM history WHERE is_completed = 1 GROUP BY date", null);
 
-        // Заполняем карту количеством выполненных привычек по дням
         while (cursor.moveToNext()) {
             @SuppressLint("Range") String dateStr = cursor.getString(cursor.getColumnIndex("date"));
             int count = cursor.getInt(1);  // Количество выполненных привычек в этот день
