@@ -120,16 +120,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM " + HABITS_TABLE + " WHERE " + HABITS_USER_ID + " = ?", new String[]{String.valueOf(userId)});
 
         if (cursor != null && cursor.moveToFirst()) {
-            // Получаем индекс столбца для HABITS_TITLE
+            // Получаем индекс столбцов для HABITS_ID и HABITS_TITLE
+            int idColumnIndex = cursor.getColumnIndex(HABITS_ID);
             int titleColumnIndex = cursor.getColumnIndex(HABITS_TITLE);
-            if (titleColumnIndex != -1) {  // Проверяем, что столбец существует
+
+            if (idColumnIndex != -1 && titleColumnIndex != -1) {  // Проверяем, что столбцы существуют
                 do {
-                    String title = cursor.getString(titleColumnIndex);
-                    habitList.add(new Habit(title));  // Добавляем привычку в список
+                    int id = cursor.getInt(idColumnIndex);  // Получаем ID привычки
+                    String title = cursor.getString(titleColumnIndex);  // Получаем название привычки
+                    habitList.add(new Habit(id, title));  // Добавляем привычку в список
                 } while (cursor.moveToNext());
             } else {
-                // Обработка ошибки, если столбец не найден
-                Log.e("DatabaseError", "Column " + HABITS_TITLE + " not found.");
+                // Обработка ошибки, если столбцы не найдены
+                Log.e("DatabaseError", "Column " + HABITS_ID + " or " + HABITS_TITLE + " not found.");
             }
         }
 
@@ -138,6 +141,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return habitList;
     }
+
 
 
     public int getUserIdByEmail(String email) {
@@ -165,4 +169,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return -1;  // Если пользователь не найден
     }
+
+    public boolean updateHabit(int habitId, String newTitle) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(HABITS_TITLE, newTitle);  // Обновляем только название привычки
+
+        int rowsUpdated = db.update(HABITS_TABLE, values, HABITS_ID + " = ?", new String[]{String.valueOf(habitId)});
+        db.close();
+        return rowsUpdated > 0;  // Если обновлены строки, то возвращаем true
+    }
+
 }

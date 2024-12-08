@@ -3,15 +3,12 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="16dp"
-    android:layout_marginBottom="8dp"
     android:background="?android:attr/selectableItemBackground">
 
     <TextView
         android:id="@+id/habitTitle"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:text="Habit Title"
-        android:textSize="18sp"/>
-
+        android:textSize="18sp" />
 </LinearLayout>
