@@ -199,6 +199,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return rowsUpdated > 0;  // Если обновлены строки, то возвращаем true
     }
 
+    public boolean updateHabitStatus(int habitId, boolean isCompleted) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("is_completed", isCompleted ? 1 : 0);  // 1 для выполненной привычки, 0 для невыполненной
+
+        int rowsUpdated = db.update(HABITS_TABLE, values, HABITS_ID + " = ?", new String[]{String.valueOf(habitId)});
+        db.close();
+        return rowsUpdated > 0;  // Если обновлена хотя бы одна строка, возвращаем true
+    }
+
+
 
 
 }

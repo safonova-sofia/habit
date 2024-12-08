@@ -5,6 +5,9 @@ import static com.example.myapplication.LoginActivity.PREFS_NAME;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -17,6 +20,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,7 +34,6 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
     private Button createHabitButton;
     private DatabaseHelper databaseHelper;
     private int userId;
-
 
     @Nullable
     @Override
@@ -54,8 +57,6 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
 
         habitList = databaseHelper.getHabitsByUserId(userId);
 
-
-
         // Инициализация адаптера и RecyclerView
         adapter = new HabitsAdapter(habitList, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -67,18 +68,56 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
             startActivity(intent);  // Переход на активность создания привычки
         });
 
+        // Настройка ItemTouchHelper для свайпов
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                // Получаем позицию свайпа
+                int position = viewHolder.getAdapterPosition();
+                Habit habit = habitList.get(position);
+
+                // Отметить привычку как выполненную
+                habit.setCompleted(true); // Обновляем статус выполнения в объекте Habit
+                databaseHelper.updateHabitStatus(habit.getId(), true); // Обновляем в базе данных
+
+                // Обновить адаптер и UI
+                habitList.remove(position);
+                adapter.notifyItemRemoved(position);
+
+                Toast.makeText(getContext(), "Привычка отмечена как выполненная!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+
+                // Отображаем цвет на свайпе
+                View itemView = viewHolder.itemView;
+                Paint paint = new Paint();
+                if (dX > 0) {
+                    // Свайп вправо — цвет зеленый (для выполненной привычки)
+                    paint.setColor(Color.GREEN);
+                    c.drawRect((float) itemView.getLeft(), (float) itemView.getTop(), dX, (float) itemView.getBottom(), paint);
+                } else {
+                    // Свайп влево — цвет красный (для отмены действия)
+                    paint.setColor(Color.RED);
+                    c.drawRect((float) itemView.getRight() + dX, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom(), paint);
+                }
+            }
+        };
+
+        // Применение ItemTouchHelper к RecyclerView
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(itemTouchHelperCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
         return view;
     }
-
-    private void loadHabits() {
-        // Загружаем обновленные привычки из базы данных
-        habitList = databaseHelper.getHabitsByUserId(userId);  // Загружаем привычки из базы данных
-
-        // Уведомляем адаптер о том, что данные обновились
-        adapter.notifyDataSetChanged();  // Обновляем RecyclerView
-    }
-
-
 
     @Override
     public void onHabitClick(Habit habit) {
@@ -92,4 +131,3 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
         startActivity(intent);
     }
 }
-
