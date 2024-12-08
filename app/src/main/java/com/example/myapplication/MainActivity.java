@@ -1,6 +1,5 @@
 package com.example.myapplication;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,20 +11,24 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
 
-    @SuppressLint("NonConstantResourceId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Находим элементы
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
+        // Получаем фрагмент по умолчанию
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.fragment_container, new HabitsFragment()).commit();
+        fragmentManager.beginTransaction().replace(R.id.fragment_container, new HabitsFragment()).commit(); // Показываем HabitsFragment
+        bottomNavigationView.setSelectedItemId(R.id.nav_habits); // Устанавливаем активную вкладку
 
+        // Устанавливаем слушатель для BottomNavigationView
         bottomNavigationView.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
 
+            // Переключение фрагментов в зависимости от выбранной вкладки
             if (item.getItemId() == R.id.nav_account) {
                 selectedFragment = new AccountFragment();
             } else if (item.getItemId() == R.id.nav_habits) {
@@ -35,8 +38,10 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (selectedFragment != null) {
+                // Заменяем текущий фрагмент на выбранный
                 fragmentManager.beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
             }
+
             return true;
         });
     }

@@ -1,6 +1,11 @@
 package com.example.myapplication;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.example.myapplication.LoginActivity.KEY_IS_LOGGED_IN;
+import static com.example.myapplication.LoginActivity.PREFS_NAME;
+
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,13 +34,15 @@ public class AccountFragment extends Fragment {
     }
 
     private void logout() {
-        // Перенаправление на экран входа
+        // Используем requireContext() для получения контекста
+        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_IS_LOGGED_IN, false); // Сбрасываем флаг
+        editor.apply();
+
+        // Переходим обратно на экран входа
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         startActivity(intent);
-
-        // Закрытие MainActivity
-        if (getActivity() != null) {
-            getActivity().finish();
-        }
+        getActivity().finish(); // Закрыть текущую активность
     }
 }

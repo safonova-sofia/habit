@@ -25,10 +25,10 @@ public class CreateHabitActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> {
             String habitTitle = habitTitleEditText.getText().toString().trim();
             if (!habitTitle.isEmpty()) {
-                // Сохранить привычку в базе данных (метод, который нужно реализовать)
+                // Сохранить привычку в базе данных
                 saveHabit(habitTitle);
                 Toast.makeText(this, "Привычка сохранена", Toast.LENGTH_SHORT).show();
-                finish();
+                finish();  // Закрыть текущую активность
             } else {
                 Toast.makeText(this, "Введите название привычки", Toast.LENGTH_SHORT).show();
             }
@@ -36,11 +36,9 @@ public class CreateHabitActivity extends AppCompatActivity {
     }
 
     private void saveHabit(String title) {
-        // Получаем ID пользователя, если оно требуется (например, из сессии)
-        int userId = 1; // Замените на реальный ID текущего пользователя
-
-        // Сохраняем привычку в базе данных
-        boolean isSaved = databaseHelper.addHabit(title, userId);
+        // Здесь сохраняем привычку в базу данных
+        // Например, userId = 1 для теста
+        boolean isSaved = databaseHelper.addHabit(title, 1);
         if (!isSaved) {
             Toast.makeText(this, "Ошибка при сохранении привычки", Toast.LENGTH_SHORT).show();
         }

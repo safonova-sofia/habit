@@ -1,8 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -17,9 +16,24 @@ public class LoginActivity extends AppCompatActivity {
     private Button loginButton, registerButton;
     private DatabaseHelper databaseHelper;
 
+    // Имя файла для SharedPreferences
+    static final String PREFS_NAME = "UserPrefs";
+    static final String KEY_IS_LOGGED_IN = "is_logged_in";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Проверка, если пользователь уже залогинен
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        boolean isLoggedIn = prefs.getBoolean(KEY_IS_LOGGED_IN, false);
+
+        if (isLoggedIn) {
+            // Если пользователь уже авторизован, сразу переходим на MainActivity
+            startMainActivity();
+            return;
+        }
+
         setContentView(R.layout.activity_login);
 
         // Инициализация элементов
@@ -53,22 +67,23 @@ public class LoginActivity extends AppCompatActivity {
         // Проверка в базе данных
         boolean isAuthenticated = databaseHelper.loginUser(email, password);
         if (isAuthenticated) {
+            // Сохранение состояния входа в SharedPreferences
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean(KEY_IS_LOGGED_IN, true);
+            editor.apply();  // Сохраняем информацию о том, что пользователь вошел
+
             Toast.makeText(this, "Вход выполнен", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(intent);
-            finish(); // Закрытие текущей активности
+            startMainActivity(); // Переход к MainActivity
         } else {
             Toast.makeText(this, "Неверные данные или пользователь не существует", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private boolean validateUser(String email, String password) {
-        SQLiteDatabase db = databaseHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM users WHERE email = ? AND password = ?", new String[]{email, password});
-        boolean isValid = cursor.getCount() > 0;
-        cursor.close();
-        db.close();
-        return isValid;
+    // Метод для перехода в MainActivity
+    private void startMainActivity() {
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish(); // Закрытие текущей активности
     }
-
 }
