@@ -209,10 +209,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return rowsUpdated > 0;  // Если обновлена хотя бы одна строка, возвращаем true
     }
 
-
-
-
-
+    public boolean deleteHabit(int habitId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        // Удаляем привычку по её ID
+        int rowsDeleted = db.delete(HABITS_TABLE, HABITS_ID + " = ?", new String[]{String.valueOf(habitId)});
+        db.close();
+        return rowsDeleted > 0;  // Если количество удаленных строк больше 0, значит удаление прошло успешно
+    }
 
 
 

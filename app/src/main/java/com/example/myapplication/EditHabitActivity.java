@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class EditHabitActivity extends AppCompatActivity {
 
     private EditText habitTitleEditText;
-    private Button saveButton;
+    private Button saveButton, deleteButton;
     private DatabaseHelper databaseHelper;
     private Habit habit;
 
@@ -22,6 +22,7 @@ public class EditHabitActivity extends AppCompatActivity {
 
         habitTitleEditText = findViewById(R.id.habitTitleEditText);
         saveButton = findViewById(R.id.saveButton);
+        deleteButton = findViewById(R.id.deleteButton);  // Получаем кнопку для удаления привычки
         databaseHelper = new DatabaseHelper(this);
 
         // Получаем информацию о привычке, переданную через Intent
@@ -48,8 +49,12 @@ public class EditHabitActivity extends AppCompatActivity {
                 Toast.makeText(this, "Введите название привычки", Toast.LENGTH_SHORT).show();
             }
         });
-    }
 
+        deleteButton.setOnClickListener(v -> {
+            // Удаляем привычку из базы данных
+            deleteHabit();
+        });
+    }
 
     private void updateHabit(String newTitle) {
         // Обновляем привычку в базе данных, используя id привычки
@@ -57,6 +62,19 @@ public class EditHabitActivity extends AppCompatActivity {
             boolean isUpdated = databaseHelper.updateHabit(habit.getId(), newTitle);
             if (!isUpdated) {
                 Toast.makeText(this, "Ошибка при обновлении привычки", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void deleteHabit() {
+        // Удаляем привычку из базы данных
+        if (habit != null) {
+            boolean isDeleted = databaseHelper.deleteHabit(habit.getId());
+            if (isDeleted) {
+                Toast.makeText(this, "Привычка удалена", Toast.LENGTH_SHORT).show();
+                finish();  // Закрываем активность после удаления
+            } else {
+                Toast.makeText(this, "Ошибка при удалении привычки", Toast.LENGTH_SHORT).show();
             }
         }
     }
