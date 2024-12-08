@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -14,6 +16,7 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.HabitViewH
 
     private List<Habit> habitList;
     private OnHabitClickListener listener;
+    private GestureDetector gestureDetector;
 
     public HabitsAdapter(List<Habit> habitList, OnHabitClickListener listener) {
         this.habitList = habitList;
@@ -32,8 +35,14 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.HabitViewH
         Habit habit = habitList.get(position);
         holder.titleTextView.setText(habit.getTitle());
 
-        // Обработка клика на элемент списка
+        // Обработка клика по привычке
         holder.itemView.setOnClickListener(v -> listener.onHabitClick(habit));
+
+        // Обработка долгого нажатия для редактирования привычки
+        holder.itemView.setOnTouchListener((v, event) -> {
+            gestureDetector.onTouchEvent(event);
+            return true;
+        });
     }
 
     @Override
@@ -53,5 +62,10 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.HabitViewH
     // Интерфейс для обработки клика
     public interface OnHabitClickListener {
         void onHabitClick(Habit habit);
+    }
+
+    // Создание GestureDetector для обработки долгого нажатия
+    public void setGestureDetector(GestureDetector gestureDetector) {
+        this.gestureDetector = gestureDetector;
     }
 }

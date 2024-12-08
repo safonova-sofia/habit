@@ -6,7 +6,9 @@ import static com.example.myapplication.LoginActivity.PREFS_NAME;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -54,6 +56,22 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
+        // Создаем GestureDetector для обработки долгого нажатия
+        GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public void onLongPress(MotionEvent e) {
+                // Получаем элемент, на котором было долгого нажатия
+                int position = recyclerView.getChildAdapterPosition(recyclerView.findChildViewUnder(e.getX(), e.getY()));
+                if (position != RecyclerView.NO_POSITION) {
+                    Habit habit = habitList.get(position);
+                    openEditHabitActivity(habit);
+                }
+            }
+        });
+
+        // Устанавливаем GestureDetector в адаптер
+        adapter.setGestureDetector(gestureDetector);
+
         // Обработка нажатия кнопки для создания привычки
         createHabitButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), CreateHabitActivity.class);
@@ -65,14 +83,13 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
 
     @Override
     public void onHabitClick(Habit habit) {
-        if (habit != null) {
-            Intent intent = new Intent(getActivity(), EditHabitActivity.class);
-            intent.putExtra("habit", habit);  // Передаем объект Habit через Intent
-            startActivity(intent);
-        } else {
-            Toast.makeText(getActivity(), "Ошибка: привычка не найдена", Toast.LENGTH_SHORT).show();
-        }
+        // Обработка клика по привычке
+        openEditHabitActivity(habit);
     }
 
-
+    private void openEditHabitActivity(Habit habit) {
+        Intent intent = new Intent(getActivity(), EditHabitActivity.class);
+        intent.putExtra("habit", habit);  // Передаем объект Habit в активность
+        startActivity(intent);
+    }
 }
