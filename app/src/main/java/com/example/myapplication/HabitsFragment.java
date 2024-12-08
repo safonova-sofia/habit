@@ -89,19 +89,21 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
 
                     // Перемещаем привычку в конец списка
                     habitList.remove(position);
-                    habitList.add(habit);
+                    habitList.add(habit);  // Добавляем привычку в конец списка
                     adapter.notifyItemMoved(position, habitList.size() - 1);  // Перемещаем элемент в конец
+                    adapter.notifyDataSetChanged();  // Обновляем адаптер
                     Toast.makeText(getContext(), "Привычка отмечена как выполненная!", Toast.LENGTH_SHORT).show();
                 } else if (direction == ItemTouchHelper.LEFT) {
                     // Свайп влево — отмечаем как невыполненную
                     habit.setCompleted(false); // Обновляем статус выполнения в объекте Habit
-                    habit.setBackgroundColor("#FFFFFF");  // Меняем цвет фона на белый
+                    habit.setBackgroundColor("#FFFFFF");  // Меняем цвет фона на белый (или другой)
                     databaseHelper.updateHabitStatus(habit.getId(), false); // Обновляем в базе данных
 
-                    // Перемещаем привычку обратно в список
+                    // Перемещаем привычку обратно в начало списка
                     habitList.remove(position);
                     habitList.add(0, habit);  // Добавляем в начало списка
                     adapter.notifyItemMoved(position, 0);  // Перемещаем элемент в начало
+                    adapter.notifyDataSetChanged();  // Обновляем адаптер
                     Toast.makeText(getContext(), "Привычка отменена!", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -114,7 +116,7 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
                 View itemView = viewHolder.itemView;
                 Paint paint = new Paint();
                 if (dX > 0) {
-                    // Свайп вправо — цвет серый
+                    // Свайп вправо — цвет серый (для выполнения)
                     paint.setColor(Color.GREEN);
                     c.drawRect((float) itemView.getLeft(), (float) itemView.getTop(), dX, (float) itemView.getBottom(), paint);
                 } else {
