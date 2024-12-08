@@ -96,7 +96,11 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
                 } else if (direction == ItemTouchHelper.LEFT) {
                     // Свайп влево — отмечаем как невыполненную
                     habit.setCompleted(false); // Обновляем статус выполнения в объекте Habit
-                    habit.setBackgroundColor("#FFFFFF");  // Меняем цвет фона на белый (или другой)
+
+                    // Генерация случайного цвета для невыполненной привычки
+                    String randomColor = ColorUtils.getRandomPastelColor();
+                    habit.setBackgroundColor(randomColor);  // Присваиваем случайный цвет
+
                     databaseHelper.updateHabitStatus(habit.getId(), false); // Обновляем в базе данных
 
                     // Перемещаем привычку обратно в начало списка
@@ -104,7 +108,7 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
                     habitList.add(0, habit);  // Добавляем в начало списка
                     adapter.notifyItemMoved(position, 0);  // Перемещаем элемент в начало
                     adapter.notifyDataSetChanged();  // Обновляем адаптер
-                    Toast.makeText(getContext(), "Привычка отменена!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Привычка отменена и получена новый цвет!", Toast.LENGTH_SHORT).show();
                 }
             }
 
