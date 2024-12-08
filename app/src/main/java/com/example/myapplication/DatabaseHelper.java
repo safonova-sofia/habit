@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "habitTracker.db";
@@ -94,5 +97,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return exists;
+    }
+
+    // метод addHabit, который будет сохранять привычку в базе данных
+    public boolean addHabit(String title, int userId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(HABITS_TITLE, title);
+        values.put(HABITS_USER_ID, userId);  // ID пользователя, для которого сохраняется привычка
+
+        long result = db.insert(HABITS_TABLE, null, values);
+        db.close();
+        return result != -1;  // Если результат -1, то произошла ошибка
+    }
+
+    public List<Habit> getHabitsByUserId(int userId) {
+        List<Habit> habitList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Запрос для получения привычек по userId
+        Cursor cursor = db.rawQuery("SELECT * FROM " + HABITS_TABLE + " WHERE " + HABITS_USER_ID + " = ?", new String[]{String.valueOf(userId)});
+
+        if (cursor.moveToFirst()) {
+            do {
+                String title = cursor.getString(cursor.getColumnIndex(HABITS_TITLE));
+                habitList.add(new Habit(title));  // Добавляем привычку в список
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return habitList;
     }
 }
