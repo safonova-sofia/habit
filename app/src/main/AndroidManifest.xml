@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"
+        android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.SET_ALARM"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
+
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,26 +19,35 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
-        <activity android:name=".MainActivity" />
-
-        <activity android:name=".LoginActivity"
+        <activity
+            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".RegisterActivity"
-            android:exported="true">
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".CreateHabitActivity" />
+        <activity
+            android:exported="false"
+            android:name=".MainActivity"></activity>
 
-        <activity android:name=".EditHabitActivity"></activity>
+        <activity android:name=".CreateHabitActivity"
+            android:exported="false" />
+
+        <activity android:name=".EditHabitActivity"
+            android:exported="false"></activity>
+
+        <receiver android:name=".NotificationReceiver" android:exported="false"/>
 
     </application>
 
