@@ -48,10 +48,11 @@ public class CalendarAdapter extends BaseAdapter {
 
         // Установка цвета в зависимости от количества выполненных привычек
         int completionCount = dayData.getHabitCompletionCount();
-        int colorIntensity = Math.min(255, completionCount * 30);
-        dayText.setBackgroundColor(Color.rgb(255 - colorIntensity, 255, 255 - colorIntensity));
+        int colorIntensity = Math.min(255, completionCount * 30);  // Ограничиваем интенсивность цвета
+        dayText.setBackgroundColor(Color.rgb(255 - colorIntensity, 255, 255 - colorIntensity));  // Используем RGB для получения "теплого" оттенка
 
         return convertView;
     }
 }
+
 

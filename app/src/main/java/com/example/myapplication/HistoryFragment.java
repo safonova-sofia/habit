@@ -1,5 +1,8 @@
 package com.example.myapplication;
 
+import android.annotation.SuppressLint;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -27,11 +30,15 @@ public class HistoryFragment extends Fragment {
     private TextView monthTitle;
     private Map<LocalDate, Integer> habitCompletionMap;
     private YearMonth currentMonth;
+    private DatabaseHelper databaseHelper;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_history, container, false);
+
+        // Инициализируем databaseHelper
+        databaseHelper = new DatabaseHelper(getContext());
 
         gridView = view.findViewById(R.id.calendarGridView);
         monthTitle = view.findViewById(R.id.monthTitle);
@@ -60,7 +67,7 @@ public class HistoryFragment extends Fragment {
         int totalDays = currentMonth.lengthOfMonth();
         for (int i = 1; i <= totalDays; i++) {
             LocalDate date = currentMonth.atDay(i);
-            int completionCount = habitCompletionMap.getOrDefault(date, 0);
+            int completionCount = habitCompletionMap.getOrDefault(date, 0);  // Получаем количество выполненных привычек для этого дня
             days.add(new DayData(date.getDayOfMonth(), completionCount));
         }
 
@@ -69,15 +76,27 @@ public class HistoryFragment extends Fragment {
         gridView.setAdapter(adapter);
     }
 
+
     private Map<LocalDate, Integer> loadHabitCompletionData() {
-        // Загрузка данных из базы данных
         Map<LocalDate, Integer> data = new HashMap<>();
 
-        // Пример данных
-        data.put(LocalDate.now(), 3); // 3 привычки выполнены сегодня
-        data.put(LocalDate.now().minusDays(1), 1);
-        data.put(LocalDate.now().minusDays(2), 5);
+        // Получаем все записи из таблицы HISTORY, чтобы подсчитать количество выполненных привычек для каждого дня
+        SQLiteDatabase db = databaseHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT date, COUNT(*) FROM history WHERE is_completed = 1 GROUP BY date", null);
+
+        // Заполняем карту количеством выполненных привычек по дням
+        while (cursor.moveToNext()) {
+            @SuppressLint("Range") String dateStr = cursor.getString(cursor.getColumnIndex("date"));
+            int count = cursor.getInt(1);  // Количество выполненных привычек в этот день
+
+            LocalDate date = LocalDate.parse(dateStr);
+            data.put(date, count);  // Сохраняем количество выполненных привычек для этой даты
+        }
+        cursor.close();
+        db.close();
 
         return data;
     }
+
+
 }
