@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -13,7 +14,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "habitTracker.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     // Таблицы
     public static final String USERS_TABLE = "users";
@@ -28,7 +29,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Поля таблицы habits
     public static final String HABITS_ID = "id";
     public static final String HABITS_TITLE = "title";
+    public static final String HABITS_DESCRIPTION = "description";
     public static final String HABITS_USER_ID = "user_id";
+    public static final String HABITS_CREATED_AT = "created_at";
+    public static final String HABITS_REPEAT_TYPE = "repeat_type";
+    public static final String HABITS_DAYS_OF_WEEK = "days_of_week";
+    public static final String HABITS_DAYS_OF_MONTH = "days_of_month";
+    public static final String HABITS_IS_COMPLETED = "is_completed";
+    public static final String HABITS_BACKGROUND_COLOR = "backgroundColor";
 
     // Поля таблицы history
     public static final String HISTORY_ID = "id";
@@ -50,10 +58,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + HABITS_TABLE + " (" +
                 HABITS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 HABITS_TITLE + " TEXT, " +
+                HABITS_DESCRIPTION + " TEXT, " +
                 HABITS_USER_ID + " INTEGER, " +
-                "is_completed INTEGER DEFAULT 0, " +  // Статус выполнения
-                "backgroundColor TEXT, " +  // Столбец для хранения цвета фона
+                HABITS_CREATED_AT + " TEXT, " +
+                HABITS_REPEAT_TYPE + " TEXT, " +
+                HABITS_DAYS_OF_WEEK + " TEXT, " +
+                HABITS_DAYS_OF_MONTH + " TEXT, " +
+                "is_completed INTEGER DEFAULT 0, " +
+                HABITS_BACKGROUND_COLOR + " TEXT, " +  // Новый столбец для цвета фона
                 "FOREIGN KEY(" + HABITS_USER_ID + ") REFERENCES " + USERS_TABLE + "(" + USERS_ID + "))");
+
 
         db.execSQL("CREATE TABLE " + HISTORY_TABLE + " (" +
                 HISTORY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -64,18 +78,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 2) {
-            // Удаляем старую таблицу (если нужно)
-            db.execSQL("DROP TABLE IF EXISTS " + HABITS_TABLE);
-
-            // Создаем новую таблицу с нужной структурой
-            db.execSQL("CREATE TABLE " + HABITS_TABLE + " (" +
-                    HABITS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    HABITS_TITLE + " TEXT, " +
-                    HABITS_USER_ID + " INTEGER, " +
-                    "is_completed INTEGER DEFAULT 0, " +
-                    "backgroundColor TEXT, " +  // Новый столбец для цвета фона
-                    "FOREIGN KEY(" + HABITS_USER_ID + ") REFERENCES " + USERS_TABLE + "(" + USERS_ID + "))");
+        if (oldVersion < 5) {
+            db.execSQL("ALTER TABLE " + HABITS_TABLE + " ADD COLUMN " + HABITS_DESCRIPTION + " TEXT");
+            db.execSQL("ALTER TABLE " + HABITS_TABLE + " ADD COLUMN " + HABITS_CREATED_AT + " TEXT");
+            db.execSQL("ALTER TABLE " + HABITS_TABLE + " ADD COLUMN " + HABITS_REPEAT_TYPE + " TEXT");
+            db.execSQL("ALTER TABLE " + HABITS_TABLE + " ADD COLUMN " + HABITS_DAYS_OF_WEEK + " TEXT");
+            db.execSQL("ALTER TABLE " + HABITS_TABLE + " ADD COLUMN " + HABITS_DAYS_OF_MONTH + " TEXT");
         }
         // Добавьте другие проверки для разных версий базы данных, если необходимо
     }
@@ -114,13 +122,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // метод addHabit, который будет сохранять привычку в базе данных
-    public boolean addHabit(String title, int userId, String backgroundColor, boolean isCompleted) {
+    public boolean addHabit(String title, String description, int userId, String backgroundColor, String repeatType, String daysOfWeek, String daysOfMonth, String createdAt, boolean isCompleted) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(HABITS_TITLE, title);
+        values.put(HABITS_DESCRIPTION, description);
         values.put(HABITS_USER_ID, userId);
-        values.put("backgroundColor", backgroundColor);  // Сохраняем цвет фона
-        values.put("is_completed", isCompleted ? 1 : 0);  // Сохраняем статус выполнения (1 — выполнена, 0 — не выполнена)
+        values.put(HABITS_CREATED_AT, createdAt);
+        values.put(HABITS_REPEAT_TYPE, repeatType);
+        values.put(HABITS_DAYS_OF_WEEK, daysOfWeek);
+        values.put(HABITS_DAYS_OF_MONTH, daysOfMonth);
+        values.put(HABITS_BACKGROUND_COLOR, backgroundColor);
+        values.put(HABITS_IS_COMPLETED, isCompleted ? 1 : 0);  // Сохраняем статус выполнения (1 — выполнена, 0 — не выполнена)
 
         long result = db.insert(HABITS_TABLE, null, values);
         db.close();
@@ -129,38 +142,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
 
-
-
     public List<Habit> getHabitsByUserId(int userId) {
         List<Habit> habitList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-
-        // Запрос для получения привычек по userId
         Cursor cursor = db.rawQuery("SELECT * FROM " + HABITS_TABLE + " WHERE " + HABITS_USER_ID + " = ?", new String[]{String.valueOf(userId)});
 
-        if (cursor != null && cursor.moveToFirst()) {
-            // Получаем индексы столбцов для HABITS_ID, HABITS_TITLE, is_completed, backgroundColor
-            int idColumnIndex = cursor.getColumnIndex(HABITS_ID);
-            int titleColumnIndex = cursor.getColumnIndex(HABITS_TITLE);
-            int isCompletedColumnIndex = cursor.getColumnIndex("is_completed");
-            int backgroundColorColumnIndex = cursor.getColumnIndex("backgroundColor");
+        if (cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") int id = cursor.getInt(cursor.getColumnIndex(HABITS_ID));
+                @SuppressLint("Range") String title = cursor.getString(cursor.getColumnIndex(HABITS_TITLE));
+                @SuppressLint("Range") String description = cursor.getString(cursor.getColumnIndex(HABITS_DESCRIPTION));  // Получаем описание
+                @SuppressLint("Range") String createdAt = cursor.getString(cursor.getColumnIndex(HABITS_CREATED_AT));  // Получаем дату создания
+                @SuppressLint("Range") String repeatType = cursor.getString(cursor.getColumnIndex(HABITS_REPEAT_TYPE));  // Получаем тип повторения
+                @SuppressLint("Range") String daysOfWeek = cursor.getString(cursor.getColumnIndex(HABITS_DAYS_OF_WEEK));  // Получаем дни недели
+                @SuppressLint("Range") String daysOfMonth = cursor.getString(cursor.getColumnIndex(HABITS_DAYS_OF_MONTH));  // Получаем дни месяца
+                @SuppressLint("Range") boolean isCompleted = cursor.getInt(cursor.getColumnIndex(HABITS_IS_COMPLETED)) == 1;  // Преобразуем int в boolean
+                @SuppressLint("Range") String backgroundColor = cursor.getString(cursor.getColumnIndex(HABITS_BACKGROUND_COLOR));  // Получаем цвет фона
 
-            if (idColumnIndex != -1 && titleColumnIndex != -1 && isCompletedColumnIndex != -1 && backgroundColorColumnIndex != -1) {
-                do {
-                    int id = cursor.getInt(idColumnIndex);  // Получаем ID привычки
-                    String title = cursor.getString(titleColumnIndex);  // Получаем название привычки
-                    boolean isCompleted = cursor.getInt(isCompletedColumnIndex) == 1;  // Преобразуем int в boolean
-                    String backgroundColor = cursor.getString(backgroundColorColumnIndex);  // Получаем цвет фона
-
-                    habitList.add(new Habit(id, title, isCompleted, backgroundColor));  // Создаем Habit с параметрами
-                } while (cursor.moveToNext());
-            }
+                habitList.add(new Habit(id, title, description, isCompleted, backgroundColor, createdAt, repeatType, daysOfWeek, daysOfMonth));  // Создаем Habit с параметрами
+            } while (cursor.moveToNext());
         }
 
         cursor.close();
         db.close();
         return habitList;
     }
+
+
+
 
 
     public int getUserIdByEmail(String email) {
@@ -189,15 +198,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return -1;  // Если пользователь не найден
     }
 
-    public boolean updateHabit(int habitId, String newTitle) {
+    public boolean updateHabit(int habitId, String newTitle, String newDescription) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(HABITS_TITLE, newTitle);  // Обновляем только название привычки
+        values.put(HABITS_TITLE, newTitle);  // Обновляем название привычки
+        values.put(HABITS_DESCRIPTION, newDescription);  // Обновляем описание привычки
 
         int rowsUpdated = db.update(HABITS_TABLE, values, HABITS_ID + " = ?", new String[]{String.valueOf(habitId)});
         db.close();
         return rowsUpdated > 0;  // Если обновлены строки, то возвращаем true
     }
+
 
     public boolean updateHabitStatus(int habitId, boolean isCompleted) {
         SQLiteDatabase db = this.getWritableDatabase();

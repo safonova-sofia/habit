@@ -6,14 +6,25 @@ public class Habit implements Serializable {
 
     private int id;
     private String title;
+    private String description;
     private boolean isCompleted;
-    private String backgroundColor;  // Новое поле для хранения цвета фона
+    private String backgroundColor;
+    private String createdAt;
+    private String repeatType;
+    private String daysOfWeek; // JSON строка
+    private String daysOfMonth; // JSON строка
 
-    public Habit(int id, String title, boolean isCompleted, String backgroundColor) {
+    public Habit(int id, String title, String description, boolean isCompleted, String backgroundColor,
+                 String createdAt, String repeatType, String daysOfWeek, String daysOfMonth) {
         this.id = id;
         this.title = title;
+        this.description = description;
         this.isCompleted = isCompleted;
-        this.backgroundColor = backgroundColor;  // Инициализируем цвет
+        this.backgroundColor = backgroundColor;
+        this.createdAt = createdAt;
+        this.repeatType = repeatType;
+        this.daysOfWeek = daysOfWeek;
+        this.daysOfMonth = daysOfMonth;
     }
 
     // Геттеры и сеттеры
@@ -48,4 +59,10 @@ public class Habit implements Serializable {
     public void setBackgroundColor(String backgroundColor) {
         this.backgroundColor = backgroundColor;  // Устанавливаем цвет фона
     }
+
+    public String getDescription() { return description; }
+    public String getCreatedAt() { return createdAt; }
+    public String getRepeatType() { return repeatType; }
+    public String getDaysOfWeek() { return daysOfWeek; }
+    public String getDaysOfMonth() { return daysOfMonth; }
 }

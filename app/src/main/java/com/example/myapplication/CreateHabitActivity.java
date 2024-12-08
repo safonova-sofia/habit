@@ -17,7 +17,7 @@ import java.util.List;
 
 public class CreateHabitActivity extends AppCompatActivity {
 
-    private EditText habitTitleEditText;
+    private EditText habitTitleEditText, habitDescriptionEditText;
     private Button saveButton;
     private DatabaseHelper databaseHelper;
     private int userId;
@@ -30,6 +30,7 @@ public class CreateHabitActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_habit);
 
         habitTitleEditText = findViewById(R.id.habitTitleEditText);
+        habitDescriptionEditText = findViewById(R.id.habitDescriptionEditText);
         saveButton = findViewById(R.id.saveButton);
         databaseHelper = new DatabaseHelper(this);
 
@@ -46,9 +47,10 @@ public class CreateHabitActivity extends AppCompatActivity {
 
         saveButton.setOnClickListener(v -> {
             String habitTitle = habitTitleEditText.getText().toString().trim();
+            String habitDescription = habitDescriptionEditText.getText().toString().trim();  // Получаем описание привычки
             if (!habitTitle.isEmpty()) {
                 // Сохраняем привычку в базе данных с привязкой к текущему пользователю
-                saveHabit(habitTitle);
+                saveHabit(habitTitle, habitDescription);
                 Toast.makeText(this, "Привычка сохранена", Toast.LENGTH_SHORT).show();
 
             } else {
@@ -58,15 +60,22 @@ public class CreateHabitActivity extends AppCompatActivity {
     }
 
 
-    private void saveHabit(String title) {
+    private void saveHabit(String title, String description) {
         // Генерируем случайный цвет
         String randomColor = ColorUtils.getRandomPastelColor();
 
         // Устанавливаем статус выполнения как невыполненный (is_completed = false)
         boolean isCompleted = false;
 
+        String createdAt = java.text.DateFormat.getDateTimeInstance().format(new java.util.Date());
+
+        // Тип повторения и дни недели/месяца (можно установить по умолчанию, или дать пользователю выбрать)
+        String repeatType = "daily";  // Пример: ежедневное или еженедельное повторение
+        String daysOfWeek = "";  // Пример: для повторений по дням недели
+        String daysOfMonth = "";  // Пример: для повторений в определенные дни месяца
+
         // Сохраняем привычку в базе данных
-        boolean isSaved = databaseHelper.addHabit(title, userId, randomColor, isCompleted);
+        boolean isSaved = databaseHelper.addHabit(title, description, userId, randomColor, repeatType, daysOfWeek, daysOfMonth, createdAt, isCompleted);
 
         if (!isSaved) {
             Toast.makeText(this, "Ошибка при сохранении привычки", Toast.LENGTH_SHORT).show();

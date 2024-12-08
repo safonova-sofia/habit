@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class EditHabitActivity extends AppCompatActivity {
 
-    private EditText habitTitleEditText;
+    private EditText habitTitleEditText, habitDescriptionEditText;
     private Button saveButton, deleteButton;
     private DatabaseHelper databaseHelper;
     private Habit habit;
@@ -21,6 +21,7 @@ public class EditHabitActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_habit);
 
         habitTitleEditText = findViewById(R.id.habitTitleEditText);
+        habitDescriptionEditText = findViewById(R.id.habitDescriptionEditText);  // Поле для редактирования описания
         saveButton = findViewById(R.id.saveButton);
         deleteButton = findViewById(R.id.deleteButton);  // Получаем кнопку для удаления привычки
         databaseHelper = new DatabaseHelper(this);
@@ -32,6 +33,7 @@ public class EditHabitActivity extends AppCompatActivity {
         if (habit != null) {
             Log.d("EditHabitActivity", "Habit received: " + habit.getTitle());  // Логируем полученную привычку
             habitTitleEditText.setText(habit.getTitle()); // Заполняем поле старым названием привычки
+            habitDescriptionEditText.setText(habit.getDescription()); // Заполняем поле старым описанием привычки
         } else {
             Log.e("EditHabitActivity", "Habit not found!");  // Логируем ошибку, если habit == null
             Toast.makeText(this, "Ошибка: привычка не найдена", Toast.LENGTH_SHORT).show();
@@ -40,9 +42,10 @@ public class EditHabitActivity extends AppCompatActivity {
 
         saveButton.setOnClickListener(v -> {
             String habitTitle = habitTitleEditText.getText().toString().trim();
+            String habitDescription = habitDescriptionEditText.getText().toString().trim();  // Получаем описание привычки
             if (!habitTitle.isEmpty()) {
                 // Обновляем привычку в базе данных
-                updateHabit(habitTitle);
+                updateHabit(habitTitle, habitDescription);
                 Toast.makeText(this, "Привычка обновлена", Toast.LENGTH_SHORT).show();
                 finish();  // Закрываем активность
             } else {
@@ -56,10 +59,10 @@ public class EditHabitActivity extends AppCompatActivity {
         });
     }
 
-    private void updateHabit(String newTitle) {
+    private void updateHabit(String newTitle, String newDescription) {
         // Обновляем привычку в базе данных, используя id привычки
         if (habit != null) {
-            boolean isUpdated = databaseHelper.updateHabit(habit.getId(), newTitle);
+            boolean isUpdated = databaseHelper.updateHabit(habit.getId(), newTitle, newDescription);
             if (!isUpdated) {
                 Toast.makeText(this, "Ошибка при обновлении привычки", Toast.LENGTH_SHORT).show();
             }
