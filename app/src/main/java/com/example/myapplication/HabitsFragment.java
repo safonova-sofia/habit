@@ -31,11 +31,13 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
     private DatabaseHelper databaseHelper;
     private int userId;
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_habits, container, false);
 
+        // Инициализация компонентов
         recyclerView = view.findViewById(R.id.habitsRecyclerView);
         createHabitButton = view.findViewById(R.id.createHabitButton);
         databaseHelper = new DatabaseHelper(getContext());
@@ -44,33 +46,20 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
         SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         userId = prefs.getInt("user_id", -1);  // Загружаем userId
 
-        // Проверяем, если userId не найден
+        // Проверка на существование userId
         if (userId == -1) {
-            // Можно обработать ошибку, если userId не найден (например, попросить повторно войти в систему)
+            Toast.makeText(getContext(), "Ошибка: пользователь не найден", Toast.LENGTH_SHORT).show();
             return view;
         }
 
+        habitList = databaseHelper.getHabitsByUserId(userId);
+
+
+
         // Инициализация адаптера и RecyclerView
-        habitList = databaseHelper.getHabitsByUserId(userId); // Загружаем привычки из базы данных
-        adapter = new HabitsAdapter(habitList, this);  // Передаем этот фрагмент как слушатель
+        adapter = new HabitsAdapter(habitList, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
-
-        // Создаем GestureDetector для обработки долгого нажатия
-        GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public void onLongPress(MotionEvent e) {
-                // Получаем элемент, на котором было долгого нажатия
-                int position = recyclerView.getChildAdapterPosition(recyclerView.findChildViewUnder(e.getX(), e.getY()));
-                if (position != RecyclerView.NO_POSITION) {
-                    Habit habit = habitList.get(position);
-                    openEditHabitActivity(habit);
-                }
-            }
-        });
-
-        // Устанавливаем GestureDetector в адаптер
-        adapter.setGestureDetector(gestureDetector);
 
         // Обработка нажатия кнопки для создания привычки
         createHabitButton.setOnClickListener(v -> {
@@ -80,6 +69,16 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
 
         return view;
     }
+
+    private void loadHabits() {
+        // Загружаем обновленные привычки из базы данных
+        habitList = databaseHelper.getHabitsByUserId(userId);  // Загружаем привычки из базы данных
+
+        // Уведомляем адаптер о том, что данные обновились
+        adapter.notifyDataSetChanged();  // Обновляем RecyclerView
+    }
+
+
 
     @Override
     public void onHabitClick(Habit habit) {
@@ -93,3 +92,4 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
         startActivity(intent);
     }
 }
+

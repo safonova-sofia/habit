@@ -3,6 +3,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="16dp"
+    android:layout_marginBottom="8dp"
     android:background="?android:attr/selectableItemBackground">
 
     <TextView
@@ -10,5 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Habit Title"
-        android:textSize="18sp" />
+        android:padding="8dp"
+        android:textSize="18sp"
+        android:textColor="@android:color/black"/>
 </LinearLayout>

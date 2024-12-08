@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.graphics.Color;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -16,7 +17,6 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.HabitViewH
 
     private List<Habit> habitList;
     private OnHabitClickListener listener;
-    private GestureDetector gestureDetector;
 
     public HabitsAdapter(List<Habit> habitList, OnHabitClickListener listener) {
         this.habitList = habitList;
@@ -30,20 +30,26 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.HabitViewH
         return new HabitViewHolder(view);
     }
 
+
+
     @Override
     public void onBindViewHolder(@NonNull HabitViewHolder holder, int position) {
         Habit habit = habitList.get(position);
         holder.titleTextView.setText(habit.getTitle());
 
-        // Обработка клика по привычке
-        holder.itemView.setOnClickListener(v -> listener.onHabitClick(habit));
+        // Устанавливаем цвет фона
+        holder.itemView.setBackgroundColor(Color.parseColor(habit.getBackgroundColor()));  // Используем сохраненный цвет
 
-        // Обработка долгого нажатия для редактирования привычки
-        holder.itemView.setOnTouchListener((v, event) -> {
-            gestureDetector.onTouchEvent(event);
-            return true;
-        });
+        // Устанавливаем фон в зависимости от выполнения привычки
+        if (habit.isCompleted()) {
+            holder.itemView.setAlpha(0.5f);  // Пример: полупрозрачный фон для выполненной привычки
+        } else {
+            holder.itemView.setAlpha(1f);  // Яркий фон для невыполненной привычки
+        }
+
+        holder.itemView.setOnClickListener(v -> listener.onHabitClick(habit));
     }
+
 
     @Override
     public int getItemCount() {
@@ -59,13 +65,9 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.HabitViewH
         }
     }
 
-    // Интерфейс для обработки клика
+    // Интерфейс для клика по привычке
     public interface OnHabitClickListener {
         void onHabitClick(Habit habit);
     }
-
-    // Создание GestureDetector для обработки долгого нажатия
-    public void setGestureDetector(GestureDetector gestureDetector) {
-        this.gestureDetector = gestureDetector;
-    }
 }
+
