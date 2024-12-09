@@ -100,7 +100,8 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
                         habit.setCompleted(true); // Обновляем статус выполнения в объекте Habit
                         //habit.setBackgroundColor("#808080");  // Меняем цвет фона на серый
                         databaseHelper.updateHabitStatus(habit.getId(), true); // Обновляем в базе данных
-
+                        // Добавляем запись в history
+                        databaseHelper.addHistoryRecord(habit.getId(), true);
                         // Перемещаем привычку в конец списка
                         habitList.remove(position);
                         habitList.add(habit);  // Добавляем привычку в конец списка
@@ -110,6 +111,8 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
                     } else if (direction == ItemTouchHelper.LEFT) {
                         // Свайп влево — отмечаем как невыполненную
                         habit.setCompleted(false); // Обновляем статус выполнения в объекте Habit
+                        databaseHelper.updateHabitStatus(habit.getId(), false); // Обновляем статус привычки в базе данных
+
 
                         // Генерация случайного цвета для невыполненной привычки
                         String randomColor = ColorUtils.getRandomPastelColor();

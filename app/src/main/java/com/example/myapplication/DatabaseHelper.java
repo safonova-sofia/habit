@@ -225,11 +225,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public boolean deleteHabit(int habitId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        // Удаляем привычку по её ID
+
+        // Удаляем связанные записи в истории
+        db.delete(HISTORY_TABLE, HISTORY_HABIT_ID + " = ?", new String[]{String.valueOf(habitId)});
+
+        // Удаляем саму привычку из таблицы habits
         int rowsDeleted = db.delete(HABITS_TABLE, HABITS_ID + " = ?", new String[]{String.valueOf(habitId)});
         db.close();
+
         return rowsDeleted > 0;  // Если количество удаленных строк больше 0, значит удаление прошло успешно
     }
+
+
 
     public boolean addHistoryRecord(int habitId, boolean isCompleted) {
         SQLiteDatabase db = this.getWritableDatabase();

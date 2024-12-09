@@ -44,12 +44,12 @@ public class HistoryFragment extends Fragment {
         monthTitle = view.findViewById(R.id.monthTitle);
 
         // Инициализация данных
-        habitCompletionMap = loadHabitCompletionData();
         currentMonth = YearMonth.now();
+        habitCompletionMap = loadHabitCompletionData();
         updateCalendar();
 
         // Обработка клика по дню
-        gridView.setOnItemClickListener((AdapterView<?> parent, View v, int position, long id) -> {
+        gridView.setOnItemClickListener((parent, v, position, id) -> {
             LocalDate selectedDate = currentMonth.atDay(position + 1);
             int completionCount = habitCompletionMap.getOrDefault(selectedDate, 0);
             Toast.makeText(getContext(), "Выполнено привычек: " + completionCount, Toast.LENGTH_SHORT).show();
@@ -59,42 +59,55 @@ public class HistoryFragment extends Fragment {
     }
 
     private void updateCalendar() {
-        // Установить название текущего месяца
-        monthTitle.setText(currentMonth.getMonth().toString());
-
         // Генерация списка дней месяца
         List<DayData> days = new ArrayList<>();
         int totalDays = currentMonth.lengthOfMonth();
         for (int i = 1; i <= totalDays; i++) {
             LocalDate date = currentMonth.atDay(i);
-            int completionCount = habitCompletionMap.getOrDefault(date, 0);  // Получаем количество выполненных привычек для этого дня
+            int completionCount = habitCompletionMap.getOrDefault(date, 0);
             days.add(new DayData(date.getDayOfMonth(), completionCount));
         }
 
-        // Установка адаптера для GridView
+        // Обновление адаптера
         CalendarAdapter adapter = new CalendarAdapter(getContext(), days);
         gridView.setAdapter(adapter);
     }
 
-
     private Map<LocalDate, Integer> loadHabitCompletionData() {
         Map<LocalDate, Integer> data = new HashMap<>();
-
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT date, COUNT(*) FROM history WHERE is_completed = 1 GROUP BY date", null);
+
+        Cursor cursor = db.rawQuery(
+                "SELECT date, COUNT(*) FROM history WHERE is_completed = 1 GROUP BY date", null);
 
         while (cursor.moveToNext()) {
             @SuppressLint("Range") String dateStr = cursor.getString(cursor.getColumnIndex("date"));
-            int count = cursor.getInt(1);  // Количество выполненных привычек в этот день
+            @SuppressLint("Range") int count = cursor.getInt(1);
 
             LocalDate date = LocalDate.parse(dateStr);
-            data.put(date, count);  // Сохраняем количество выполненных привычек для этой даты
+            data.put(date, count);
         }
+
         cursor.close();
         db.close();
-
         return data;
     }
 
-
+    public boolean deleteHabitAndUpdateUI(int habitId) {
+        boolean isDeleted = databaseHelper.deleteHabit(habitId);
+        if (isDeleted) {
+            habitCompletionMap = loadHabitCompletionData();
+            updateCalendar();
+        } else {
+            Toast.makeText(getContext(), "Ошибка при удалении привычки", Toast.LENGTH_SHORT).show();
+        }
+        return isDeleted;
+    }
 }
+
+
+
+
+
+
+
