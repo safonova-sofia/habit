@@ -87,9 +87,6 @@ public class CreateHabitActivity extends AppCompatActivity {
             finish();
         }
     }
-
-
-
-
-
 }
+
+

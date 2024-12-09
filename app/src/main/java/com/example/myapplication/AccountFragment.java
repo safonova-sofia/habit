@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
@@ -30,7 +31,8 @@ import java.util.Calendar;
 
 public class AccountFragment extends Fragment {
 
-    private Button buttonSetNotification, buttonChangeTheme, logoutButton;
+    private Button buttonSetNotification, buttonChangeTheme, logoutButton, deleteAccountButton;
+    private DatabaseHelper databaseHelper;
 
     @Nullable
     @Override
@@ -40,6 +42,9 @@ public class AccountFragment extends Fragment {
         logoutButton = view.findViewById(R.id.buttonLogout);
         buttonSetNotification = view.findViewById(R.id.buttonSetNotification);
         buttonChangeTheme = view.findViewById(R.id.buttonChangeTheme);
+        deleteAccountButton = view.findViewById(R.id.buttonDeleteAccount);
+
+        databaseHelper = new DatabaseHelper(getContext());
 
         SharedPreferences prefs = getActivity().getSharedPreferences("app_preferences", Context.MODE_PRIVATE);
         int themeMode = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_NO);  // Загрузка сохраненной темы
@@ -55,6 +60,8 @@ public class AccountFragment extends Fragment {
         buttonChangeTheme.setOnClickListener(v -> {
             changeTheme();
         });
+
+        deleteAccountButton.setOnClickListener(v -> deleteAccount());
 
         return view;
     }
@@ -146,6 +153,36 @@ public class AccountFragment extends Fragment {
 
         // Перезапускаем активность
         getActivity().recreate();
+    }
+
+    private void deleteAccount() {
+        // Показываем диалог подтверждения
+        new AlertDialog.Builder(getContext())
+                .setTitle("Удаление аккаунта")
+                .setMessage("Вы уверены, что хотите удалить аккаунт? Это действие необратимо.")
+                .setPositiveButton("Удалить", (dialog, which) -> {
+                    SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                    int userId = prefs.getInt("user_id", -1);
+
+                    if (userId == -1) {
+                        Toast.makeText(getContext(), "Ошибка: пользователь не найден", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    boolean isDeleted = databaseHelper.deleteUserAndAssociatedData(userId);
+                    if (isDeleted) {
+                        Toast.makeText(getContext(), "Аккаунт успешно удален", Toast.LENGTH_SHORT).show();
+                        logout(); // Выход из аккаунта и переход к экрану входа
+                    } else {
+                        Toast.makeText(getContext(), "Ошибка при удалении аккаунта", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Отмена", (dialog, which) -> {
+                    // Закрываем диалог, если пользователь отказался от удаления
+                    dialog.dismiss();
+                })
+                .create()
+                .show();
     }
 
 

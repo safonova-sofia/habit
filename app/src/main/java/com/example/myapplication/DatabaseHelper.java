@@ -273,9 +273,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return historyList;
     }
 
+    public boolean deleteUserAndAssociatedData(int userId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            // Удаляем связанные записи в таблице history
+            db.delete(HISTORY_TABLE, HISTORY_HABIT_ID + " IN (SELECT " + HABITS_ID + " FROM " + HABITS_TABLE + " WHERE " + HABITS_USER_ID + " = ?)", new String[]{String.valueOf(userId)});
 
+            // Удаляем привычки пользователя
+            db.delete(HABITS_TABLE, HABITS_USER_ID + " = ?", new String[]{String.valueOf(userId)});
+
+            // Удаляем пользователя
+            int rowsDeleted = db.delete(USERS_TABLE, USERS_ID + " = ?", new String[]{String.valueOf(userId)});
+
+            if (rowsDeleted > 0) {
+                db.setTransactionSuccessful();
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            db.endTransaction();
+        }
+    }
 
 
 
 
 }
+
+
