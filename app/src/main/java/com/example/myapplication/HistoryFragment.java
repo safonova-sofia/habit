@@ -3,14 +3,11 @@ package com.example.myapplication;
 import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,7 +24,6 @@ import java.util.Map;
 public class HistoryFragment extends Fragment {
 
     private GridView gridView;
-    private TextView monthTitle;
     private Map<LocalDate, Integer> habitCompletionMap;
     private YearMonth currentMonth;
     private DatabaseHelper databaseHelper;
@@ -41,7 +37,7 @@ public class HistoryFragment extends Fragment {
         databaseHelper = new DatabaseHelper(getContext());
 
         gridView = view.findViewById(R.id.calendarGridView);
-        monthTitle = view.findViewById(R.id.monthTitle);
+        view.findViewById(R.id.monthTitle);
 
         // Инициализация данных
         currentMonth = YearMonth.now();
@@ -51,6 +47,7 @@ public class HistoryFragment extends Fragment {
         // Обработка клика по дню
         gridView.setOnItemClickListener((parent, v, position, id) -> {
             LocalDate selectedDate = currentMonth.atDay(position + 1);
+            //noinspection DataFlowIssue
             int completionCount = habitCompletionMap.getOrDefault(selectedDate, 0);
             Toast.makeText(getContext(), "Выполнено привычек: " + completionCount, Toast.LENGTH_SHORT).show();
         });
@@ -64,6 +61,7 @@ public class HistoryFragment extends Fragment {
         int totalDays = currentMonth.lengthOfMonth();
         for (int i = 1; i <= totalDays; i++) {
             LocalDate date = currentMonth.atDay(i);
+            //noinspection DataFlowIssue
             int completionCount = habitCompletionMap.getOrDefault(date, 0);
             days.add(new DayData(date.getDayOfMonth(), completionCount));
         }
@@ -93,16 +91,6 @@ public class HistoryFragment extends Fragment {
         return data;
     }
 
-    public boolean deleteHabitAndUpdateUI(int habitId) {
-        boolean isDeleted = databaseHelper.deleteHabit(habitId);
-        if (isDeleted) {
-            habitCompletionMap = loadHabitCompletionData();
-            updateCalendar();
-        } else {
-            Toast.makeText(getContext(), "Ошибка при удалении привычки", Toast.LENGTH_SHORT).show();
-        }
-        return isDeleted;
-    }
 }
 
 

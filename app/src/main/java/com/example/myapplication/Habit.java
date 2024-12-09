@@ -5,26 +5,19 @@ import java.io.Serializable;
 public class Habit implements Serializable {
 
     private int id;
-    private String title;
-    private String description;
+    private final String title;
+    private final String description;
     private boolean isCompleted;
     private String backgroundColor;
-    private String createdAt;
-    private String repeatType;
-    private String daysOfWeek; // JSON строка
-    private String daysOfMonth; // JSON строка
+    // JSON строка
+    // JSON строка
 
-    public Habit(int id, String title, String description, boolean isCompleted, String backgroundColor,
-                 String createdAt, String repeatType, String daysOfWeek, String daysOfMonth) {
+    public Habit(int id, String title, String description, boolean isCompleted, String backgroundColor) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.isCompleted = isCompleted;
         this.backgroundColor = backgroundColor;
-        this.createdAt = createdAt;
-        this.repeatType = repeatType;
-        this.daysOfWeek = daysOfWeek;
-        this.daysOfMonth = daysOfMonth;
     }
 
     // Геттеры и сеттеры
@@ -38,10 +31,6 @@ public class Habit implements Serializable {
 
     public String getTitle() {
         return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public boolean isCompleted() {
@@ -61,8 +50,5 @@ public class Habit implements Serializable {
     }
 
     public String getDescription() { return description; }
-    public String getCreatedAt() { return createdAt; }
-    public String getRepeatType() { return repeatType; }
-    public String getDaysOfWeek() { return daysOfWeek; }
-    public String getDaysOfMonth() { return daysOfMonth; }
+
 }

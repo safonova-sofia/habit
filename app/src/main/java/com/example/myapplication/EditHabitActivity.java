@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 public class EditHabitActivity extends AppCompatActivity {
 
     private EditText habitTitleEditText, habitDescriptionEditText;
-    private Button saveButton, deleteButton;
     private DatabaseHelper databaseHelper;
     private Habit habit;
 
@@ -22,8 +21,8 @@ public class EditHabitActivity extends AppCompatActivity {
 
         habitTitleEditText = findViewById(R.id.habitTitleEditText);
         habitDescriptionEditText = findViewById(R.id.habitDescriptionEditText);  // Поле для редактирования описания
-        saveButton = findViewById(R.id.saveButton);
-        deleteButton = findViewById(R.id.deleteButton);  // Получаем кнопку для удаления привычки
+        Button saveButton = findViewById(R.id.saveButton);
+        Button deleteButton = findViewById(R.id.deleteButton);  // Получаем кнопку для удаления привычки
         databaseHelper = new DatabaseHelper(this);
 
         // Получаем информацию о привычке, переданную через Intent

@@ -1,9 +1,7 @@
 package com.example.myapplication;
 
 import android.graphics.Color;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -15,8 +13,8 @@ import java.util.List;
 
 public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.HabitViewHolder> {
 
-    private List<Habit> habitList;
-    private OnHabitClickListener listener;
+    private final List<Habit> habitList;
+    private final OnHabitClickListener listener;
 
     public HabitsAdapter(List<Habit> habitList, OnHabitClickListener listener) {
         this.habitList = habitList;

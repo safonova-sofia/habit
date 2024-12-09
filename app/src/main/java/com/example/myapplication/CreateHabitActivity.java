@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
-import android.annotation.SuppressLint;
+import static com.example.myapplication.LoginActivity.PREFS_NAME;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,19 +11,15 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import static android.content.Context.MODE_PRIVATE;
-import static com.example.myapplication.LoginActivity.PREFS_NAME;
-
-import java.util.List;
-
 public class CreateHabitActivity extends AppCompatActivity {
 
     private EditText habitTitleEditText, habitDescriptionEditText;
-    private Button saveButton;
     private DatabaseHelper databaseHelper;
     private int userId;
-    private List<Habit> habitList;  // Список привычек для обновления
-    private HabitsAdapter adapter;
+
+    public CreateHabitActivity() {
+        // Список привычек для обновления
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +28,7 @@ public class CreateHabitActivity extends AppCompatActivity {
 
         habitTitleEditText = findViewById(R.id.habitTitleEditText);
         habitDescriptionEditText = findViewById(R.id.habitDescriptionEditText);
-        saveButton = findViewById(R.id.saveButton);
+        Button saveButton = findViewById(R.id.saveButton);
         databaseHelper = new DatabaseHelper(this);
 
         // Загружаем userId из SharedPreferences

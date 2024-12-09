@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText, confirmPasswordEditText;
-    private Button registerButton;
     private DatabaseHelper databaseHelper;
 
     @Override
@@ -23,7 +22,7 @@ public class RegisterActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.editTextEmail);
         passwordEditText = findViewById(R.id.editTextPassword);
         confirmPasswordEditText = findViewById(R.id.editTextConfirmPassword);
-        registerButton = findViewById(R.id.buttonRegister);
+        Button registerButton = findViewById(R.id.buttonRegister);
 
         // Инициализация базы данных
         databaseHelper = new DatabaseHelper(this);

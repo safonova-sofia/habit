@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/** @noinspection ALL*/
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "habitTracker.db";
@@ -157,7 +158,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 @SuppressLint("Range") boolean isCompleted = cursor.getInt(cursor.getColumnIndex(HABITS_IS_COMPLETED)) == 1;  // Преобразуем int в boolean
                 @SuppressLint("Range") String backgroundColor = cursor.getString(cursor.getColumnIndex(HABITS_BACKGROUND_COLOR));  // Получаем цвет фона
 
-                habitList.add(new Habit(id, title, description, isCompleted, backgroundColor, createdAt, repeatType, daysOfWeek, daysOfMonth));  // Создаем Habit с параметрами
+                habitList.add(new Habit(id, title, description, isCompleted, backgroundColor));  // Создаем Habit с параметрами
             } while (cursor.moveToNext());
         }
 
@@ -208,7 +209,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public boolean updateHabitStatus(int habitId, boolean isCompleted) {
+    public void updateHabitStatus(int habitId, boolean isCompleted) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(HABITS_IS_COMPLETED, isCompleted ? 1 : 0);
@@ -230,7 +231,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         db.close();
-        return rowsUpdated > 0;
     }
 
 
@@ -250,7 +250,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
 
-    public boolean addHistoryRecord(int habitId, boolean isCompleted) {
+    public void addHistoryRecord(int habitId, boolean isCompleted) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -262,27 +262,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(HISTORY_DATE, currentDate);
         values.put(HISTORY_IS_COMPLETED, isCompleted ? 1 : 0);  // 1 — выполнена, 0 — не выполнена
 
-        long result = db.insert(HISTORY_TABLE, null, values);
+        db.insert(HISTORY_TABLE, null, values);
         db.close();
-        return result != -1;  // Если результат -1, то произошла ошибка
-    }
-
-    public List<HistoryRecord> getHistoryByHabitId(int habitId) {
-        List<HistoryRecord> historyList = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + HISTORY_TABLE + " WHERE " + HISTORY_HABIT_ID + " = ?", new String[]{String.valueOf(habitId)});
-
-        if (cursor.moveToFirst()) {
-            do {
-                @SuppressLint("Range") String date = cursor.getString(cursor.getColumnIndex(HISTORY_DATE));
-                @SuppressLint("Range") boolean isCompleted = cursor.getInt(cursor.getColumnIndex(HISTORY_IS_COMPLETED)) == 1;
-                historyList.add(new HistoryRecord(date, isCompleted));  // Добавляем новую запись истории
-            } while (cursor.moveToNext());
-        }
-
-        cursor.close();
-        db.close();
-        return historyList;
     }
 
     public boolean deleteUserAndAssociatedData(int userId) {
@@ -290,7 +271,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.beginTransaction();
         try {
             // Удаляем привычки пользователя
-            int habitsDeleted = db.delete(HABITS_TABLE, HABITS_USER_ID + " = ?", new String[]{String.valueOf(userId)});
+            db.delete(HABITS_TABLE, HABITS_USER_ID + " = ?", new String[]{String.valueOf(userId)});
 
             // Удаляем связанные записи из истории
             db.delete(HISTORY_TABLE, HISTORY_HABIT_ID + " IN (SELECT " + HABITS_ID + " FROM " + HABITS_TABLE + " WHERE " + HABITS_USER_ID + " = ?)", new String[]{String.valueOf(userId)});

@@ -3,6 +3,7 @@ package com.example.myapplication;
 import static android.content.Context.MODE_PRIVATE;
 import static com.example.myapplication.LoginActivity.PREFS_NAME;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
@@ -10,7 +11,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -28,12 +28,9 @@ import java.util.List;
 
 public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitClickListener {
 
-    private RecyclerView recyclerView;
     private HabitsAdapter adapter;
     private List<Habit> habitList;
-    private Button createHabitButton;
     private DatabaseHelper databaseHelper;
-    private int userId;
 
     @Nullable
     @Override
@@ -41,13 +38,13 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
         View view = inflater.inflate(R.layout.fragment_habits, container, false);
 
         // Инициализация компонентов
-        recyclerView = view.findViewById(R.id.habitsRecyclerView);
-        createHabitButton = view.findViewById(R.id.createHabitButton);
+        RecyclerView recyclerView = view.findViewById(R.id.habitsRecyclerView);
+        Button createHabitButton = view.findViewById(R.id.createHabitButton);
         databaseHelper = new DatabaseHelper(getContext());
 
         // Загружаем userId из SharedPreferences
-        SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        userId = prefs.getInt("user_id", -1);  // Загружаем userId
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        int userId = prefs.getInt("user_id", -1);  // Загружаем userId
 
         // Проверка на существование userId
         if (userId == -1) {
@@ -80,6 +77,7 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
                 return false;
             }
 
+            @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 // Получаем позицию свайпа
