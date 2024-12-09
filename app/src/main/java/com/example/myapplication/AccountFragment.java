@@ -45,10 +45,6 @@ public class AccountFragment extends Fragment {
 
         databaseHelper = new DatabaseHelper(getContext());
 
-        SharedPreferences prefs = requireActivity().getSharedPreferences("app_preferences", Context.MODE_PRIVATE);
-        int themeMode = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_NO);  // Загрузка сохраненной темы
-        AppCompatDelegate.setDefaultNightMode(themeMode);
-
         // Обработка выхода из аккаунта
         logoutButton.setOnClickListener(v -> logout());
 
@@ -135,24 +131,27 @@ public class AccountFragment extends Fragment {
     }
 
     private void changeTheme() {
+        // Определяем текущий режим темы
         int currentMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         int newMode;
+
+        // Устанавливаем новый режим
         if (currentMode == Configuration.UI_MODE_NIGHT_NO) {
-            newMode = AppCompatDelegate.MODE_NIGHT_YES;
+            newMode = AppCompatDelegate.MODE_NIGHT_YES; // Переход на темную тему
         } else {
-            newMode = AppCompatDelegate.MODE_NIGHT_NO;
+            newMode = AppCompatDelegate.MODE_NIGHT_NO; // Переход на светлую тему
         }
 
-        // Сохраняем выбранный режим в SharedPreferences
-        @SuppressLint("UseRequireInsteadOfGet") SharedPreferences prefs = Objects.requireNonNull(getActivity()).getSharedPreferences("app_preferences", Context.MODE_PRIVATE);
+        // Сохраняем новый режим в SharedPreferences
+        SharedPreferences prefs = requireActivity().getSharedPreferences("app_preferences", Context.MODE_PRIVATE);
         prefs.edit().putInt("theme", newMode).apply();
 
-        // Меняем тему
-        AppCompatDelegate.setDefaultNightMode(newMode);
-
-        // Перезапускаем активность
-        getActivity().recreate();
+        // Показываем уведомление пользователю
+        Toast.makeText(getContext(), "Тема изменится при следующем запуске приложения.", Toast.LENGTH_LONG).show();
     }
+
+
+
 
     private void deleteAccount() {
         // Показываем диалог подтверждения

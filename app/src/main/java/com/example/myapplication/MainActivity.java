@@ -1,8 +1,10 @@
 package com.example.myapplication;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -12,6 +14,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Загружаем сохраненную тему из SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("app_preferences", MODE_PRIVATE);
+        int themeMode = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_NO);
+
+        // Применяем сохраненную тему
+        AppCompatDelegate.setDefaultNightMode(themeMode);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
