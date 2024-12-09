@@ -4,25 +4,44 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
+        android:fontFamily="@font/montserrat_bold"
+        android:text="Редактирование привычки"
+        android:textAlignment="center"
+        android:textSize="24sp" />
+
     <EditText
         android:id="@+id/habitTitleEditText"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="69dp"
+        android:fontFamily="@font/montserrat_regular"
         android:hint="Название привычки"
-        android:textSize="18sp"/>
+        android:textSize="18sp" />
 
     <EditText
         android:id="@+id/habitDescriptionEditText"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="120dp"
+        android:fontFamily="@font/montserrat_regular"
+        android:gravity="start"
         android:hint="Введите описание привычки"
-        android:inputType="textMultiLine"/>
+        android:inputType="textMultiLine"
+        android:textAlignment="textStart" />
 
 
     <Button
         android:id="@+id/saveButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="#60D394"
+        android:fontFamily="@font/montserrat_regular"
         android:text="Сохранить" />
 
     <Button
@@ -30,6 +49,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="#EE6055"
+        android:fontFamily="@font/montserrat_regular"
         android:text="Удалить привычку" />
 </LinearLayout>

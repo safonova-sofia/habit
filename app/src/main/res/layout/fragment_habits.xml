@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -9,32 +10,51 @@
         android:id="@+id/titleText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:fontFamily="@font/montserrat_bold"
+        android:gravity="center"
         android:text="Привычки"
-        android:textSize="24sp"
-        android:layout_marginBottom="16dp"
-        android:gravity="center"/>
+        android:textSize="24sp" />
 
     <!-- Кнопка обновления списка привычек -->
-    <Button
-        android:id="@+id/buttonRefreshHabits"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Обновить список привычек"
-        android:layout_gravity="center"/>
 
     <!-- RecyclerView для отображения привычек -->
+
+    <Button
+        android:id="@+id/buttonRefreshHabits"
+        android:layout_width="157dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="#60D394"
+        android:fontFamily="@font/montserrat_italic"
+        android:text="Обновить"
+        android:textAlignment="center"
+        android:textSize="14sp"
+        android:typeface="normal"
+        app:icon="@drawable/ic_reload"
+        app:iconGravity="end"
+        app:iconPadding="10dp"
+        app:iconSize="20dp" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/habitsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_weight="1" />
 
     <!-- Кнопка для создания новой привычки -->
     <Button
         android:id="@+id/createHabitButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Создать привычку"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="#EE6055"
+        android:fontFamily="@font/montserrat_regular"
+        android:text="Создать привычку" />
 
 </LinearLayout>

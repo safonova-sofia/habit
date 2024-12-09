@@ -151,11 +151,11 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
                 Paint paint = new Paint();
                 if (dX > 0) {
                     // Свайп вправо — цвет серый (для выполнения)
-                    paint.setColor(Color.GREEN);
+                    paint.setColor(Color.parseColor("#B9FBC0"));
                     c.drawRect((float) itemView.getLeft(), (float) itemView.getTop(), dX, (float) itemView.getBottom(), paint);
                 } else {
                     // Свайп влево — цвет для отмены (например, красный)
-                    paint.setColor(Color.RED);
+                    paint.setColor(Color.parseColor("#EE6055"));
                     c.drawRect((float) itemView.getRight() + dX, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom(), paint);
                 }
 

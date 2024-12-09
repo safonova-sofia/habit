@@ -8,11 +8,16 @@ public class ColorUtils {
         Random random = new Random();
         // Массив пастельных цветов
         String[] pastelColors = {
-                "#FFB3BA", // розовый
-                "#FFDFD3", // светлый персиковый
-                "#FFEC8B", // светлый желтый
-                "#C2F0C2", // светлый зеленый
-                "#B3D9FF"  // светлый голубой
+                "#FBF8CC",
+                "#FDE4CF",
+                "#FFCFD2",
+                "#F1C0E8",
+                "#CFBAF0",
+                "#A3C4F3",
+                "#90DBF4",
+                "#8EECF5",
+                "#98F5E1",
+                "#B9FBC0"
         };
         // Возвращаем случайный цвет из массива
         return pastelColors[random.nextInt(pastelColors.length)];

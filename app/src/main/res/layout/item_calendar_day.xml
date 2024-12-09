@@ -7,7 +7,10 @@
         android:id="@+id/calendarDayText"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="5dp"
+        android:background="@android:color/white"
+        android:fontFamily="@font/montserrat_regular"
         android:gravity="center"
         android:textColor="@android:color/black"
-        android:background="@android:color/white" />
+        android:textSize="12sp" />
 </FrameLayout>

@@ -5,33 +5,77 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <Button
-        android:id="@+id/buttonLogout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Выйти из аккаунта" />
-
     <!-- Кнопка для установки уведомлений -->
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:fontFamily="@font/montserrat_bold"
+        android:text="Ежедневные уведомления"
+        android:textSize="24sp" />
+
     <Button
         android:id="@+id/buttonSetNotification"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Установить уведомления"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="#60D394"
+        android:fontFamily="@font/montserrat_regular"
+        android:text="Установить уведомления" />
 
     <!-- Кнопка для смены темы -->
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:fontFamily="@font/montserrat_bold"
+        android:text="Тема"
+        android:textSize="24sp" />
+
     <Button
         android:id="@+id/buttonChangeTheme"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Сменить тему"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="#60D394"
+        android:fontFamily="@font/montserrat_regular"
+        android:text="Сменить тему" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:fontFamily="@font/montserrat_bold"
+        android:text="Аккаунт"
+        android:textSize="24sp" />
+
+    <Button
+        android:id="@+id/buttonLogout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="#60D394"
+        android:fontFamily="@font/montserrat_regular"
+        android:text="Выйти из аккаунта" />
 
     <Button
         android:id="@+id/buttonDeleteAccount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Удалить аккаунт"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="#EE6055"
+        android:fontFamily="@font/montserrat_regular"
+        android:text="Удалить аккаунт" />
 
 </LinearLayout>
