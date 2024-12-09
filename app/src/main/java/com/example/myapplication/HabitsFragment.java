@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,6 +41,7 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
         // Инициализация компонентов
         RecyclerView recyclerView = view.findViewById(R.id.habitsRecyclerView);
         Button createHabitButton = view.findViewById(R.id.createHabitButton);
+        Button refreshButton = view.findViewById(R.id.buttonRefreshHabits);
         databaseHelper = new DatabaseHelper(getContext());
 
         // Загружаем userId из SharedPreferences
@@ -68,6 +70,8 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
             Intent intent = new Intent(getActivity(), CreateHabitActivity.class);
             startActivity(intent);  // Переход на активность создания привычки
         });
+
+        refreshButton.setOnClickListener(v -> restartFragment());
 
         // Настройка ItemTouchHelper для свайпов
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -187,5 +191,16 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
     private void sortHabitsByCompletionStatus(List<Habit> habits) {
         habits.sort((habit1, habit2) -> Boolean.compare(habit1.isCompleted(), habit2.isCompleted()));
     }
+
+    public void restartFragment() {
+        // Получаем текущий фрагмент
+        FragmentTransaction ft = getParentFragmentManager().beginTransaction();
+
+        // Заменяем текущий фрагмент новым экземпляром того же фрагмента
+        ft.replace(R.id.fragment_container, new HabitsFragment());  // Здесь R.id.fragment_container - это контейнер, в котором фрагменты отображаются
+        ft.addToBackStack(null);  // Если нужно, чтобы фрагмент был добавлен в back stack, чтобы можно было вернуться назад
+        ft.commit();  // Применяем изменения
+    }
+
 }
 

@@ -14,6 +14,14 @@
         android:layout_marginBottom="16dp"
         android:gravity="center"/>
 
+    <!-- Кнопка обновления списка привычек -->
+    <Button
+        android:id="@+id/buttonRefreshHabits"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Обновить список привычек"
+        android:layout_gravity="center"/>
+
     <!-- RecyclerView для отображения привычек -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/habitsRecyclerView"

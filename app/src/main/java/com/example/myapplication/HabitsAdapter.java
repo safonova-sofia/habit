@@ -16,6 +16,7 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.HabitViewH
     private final List<Habit> habitList;
     private final OnHabitClickListener listener;
 
+
     public HabitsAdapter(List<Habit> habitList, OnHabitClickListener listener) {
         this.habitList = habitList;
         this.listener = listener;
