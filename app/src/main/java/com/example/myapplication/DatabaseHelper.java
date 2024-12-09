@@ -213,14 +213,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(HABITS_IS_COMPLETED, isCompleted ? 1 : 0);
 
-        // Обновляем статус выполнения привычки в таблице habits
         int rowsUpdated = db.update(HABITS_TABLE, values, HABITS_ID + " = ?", new String[]{String.valueOf(habitId)});
-        db.close();
 
-        // Добавляем запись в таблицу history
-        boolean isHistoryAdded = addHistoryRecord(habitId, isCompleted);
-        return rowsUpdated > 0 && isHistoryAdded;  // Если обновлена хотя бы одна строка и запись добавлена в историю, возвращаем true
+        // Если статус обновлен успешно, добавляем запись в историю
+        if (rowsUpdated > 0) {
+            String currentDate = LocalDate.now().toString();  // Текущая дата
+            Cursor cursor = db.rawQuery("SELECT * FROM " + HISTORY_TABLE +
+                            " WHERE " + HISTORY_HABIT_ID + " = ? AND " + HISTORY_DATE + " = ?",
+                    new String[]{String.valueOf(habitId), currentDate});
+
+            // Добавляем запись только если её ещё нет
+            if (!cursor.moveToFirst()) {
+                addHistoryRecord(habitId, isCompleted);
+            }
+            cursor.close();
+        }
+
+        db.close();
+        return rowsUpdated > 0;
     }
+
 
 
     public boolean deleteHabit(int habitId) {
@@ -277,31 +289,48 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
         try {
-            // Удаляем связанные записи в таблице history
+            // Удаляем привычки пользователя
+            int habitsDeleted = db.delete(HABITS_TABLE, HABITS_USER_ID + " = ?", new String[]{String.valueOf(userId)});
+
+            // Удаляем связанные записи из истории
             db.delete(HISTORY_TABLE, HISTORY_HABIT_ID + " IN (SELECT " + HABITS_ID + " FROM " + HABITS_TABLE + " WHERE " + HABITS_USER_ID + " = ?)", new String[]{String.valueOf(userId)});
 
-            // Удаляем привычки пользователя
-            db.delete(HABITS_TABLE, HABITS_USER_ID + " = ?", new String[]{String.valueOf(userId)});
-
             // Удаляем пользователя
-            int rowsDeleted = db.delete(USERS_TABLE, USERS_ID + " = ?", new String[]{String.valueOf(userId)});
+            int userDeleted = db.delete(USERS_TABLE, USERS_ID + " = ?", new String[]{String.valueOf(userId)});
 
-            if (rowsDeleted > 0) {
-                db.setTransactionSuccessful();
+            if (userDeleted > 0) {
+                db.setTransactionSuccessful(); // Если все успешно удалено
                 return true;
+            } else {
+                return false; // Если пользователя не удалось удалить
             }
-            return false;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         } finally {
             db.endTransaction();
+            db.close();
         }
     }
 
+    public boolean deleteHistoryRecord(int habitId, String date) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int rowsDeleted = db.delete(HISTORY_TABLE,
+                HISTORY_HABIT_ID + " = ? AND " + HISTORY_DATE + " = ?",
+                new String[]{String.valueOf(habitId), date});
+        db.close();
+        return rowsDeleted > 0;  // Возвращаем true, если запись была удалена
+    }
 
-
-
+    public boolean isHistoryRecordExists(int habitId, String date) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM " + HISTORY_TABLE + " WHERE " + HISTORY_HABIT_ID + " = ? AND " + HISTORY_DATE + " = ?",
+                new String[]{String.valueOf(habitId), date});
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        return exists;
+    }
 }
 
 

@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitClickListener {
@@ -84,6 +85,7 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
                 // Получаем позицию свайпа
                 int position = viewHolder.getAdapterPosition();
                 Habit habit = habitList.get(position);
+                String currentDate = LocalDate.now().toString();  // Получаем текущую дату
 
                 if (habit.isCompleted() && direction == ItemTouchHelper.RIGHT) {
                     // Привычка выполнена, запретить свайп вправо
@@ -98,10 +100,14 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
                     if (direction == ItemTouchHelper.RIGHT) {
                         // Свайп вправо — отмечаем как выполненную
                         habit.setCompleted(true); // Обновляем статус выполнения в объекте Habit
-                        //habit.setBackgroundColor("#808080");  // Меняем цвет фона на серый
                         databaseHelper.updateHabitStatus(habit.getId(), true); // Обновляем в базе данных
-                        // Добавляем запись в history
-                        databaseHelper.addHistoryRecord(habit.getId(), true);
+
+                        // Проверяем, существует ли уже запись в таблице истории
+                        if (!databaseHelper.isHistoryRecordExists(habit.getId(), currentDate)) {
+                            // Если записи нет, добавляем новую запись в таблицу истории
+                            databaseHelper.addHistoryRecord(habit.getId(), true);
+                        }
+
                         // Перемещаем привычку в конец списка
                         habitList.remove(position);
                         habitList.add(habit);  // Добавляем привычку в конец списка
@@ -113,12 +119,12 @@ public class HabitsFragment extends Fragment implements HabitsAdapter.OnHabitCli
                         habit.setCompleted(false); // Обновляем статус выполнения в объекте Habit
                         databaseHelper.updateHabitStatus(habit.getId(), false); // Обновляем статус привычки в базе данных
 
+                        // Удаляем запись о выполнении из таблицы history
+                        databaseHelper.deleteHistoryRecord(habit.getId(), currentDate);
 
                         // Генерация случайного цвета для невыполненной привычки
                         String randomColor = ColorUtils.getRandomPastelColor();
                         habit.setBackgroundColor(randomColor);  // Присваиваем случайный цвет
-
-                        databaseHelper.updateHabitStatus(habit.getId(), false); // Обновляем в базе данных
 
                         // Перемещаем привычку обратно в начало списка
                         habitList.remove(position);
