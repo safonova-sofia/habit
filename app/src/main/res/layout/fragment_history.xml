@@ -15,8 +15,27 @@
     <GridView
         android:id="@+id/calendarGridView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:horizontalSpacing="4dp"
         android:numColumns="7"
-        android:verticalSpacing="4dp"
-        android:horizontalSpacing="4dp" />
+        android:verticalSpacing="4dp" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/prevMonthButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Предыдущий месяц"/>
+
+        <Button
+            android:id="@+id/nextMonthButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Следующий месяц"/>
+    </LinearLayout>
 </LinearLayout>

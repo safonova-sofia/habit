@@ -7,7 +7,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -24,6 +26,7 @@ import java.util.Map;
 public class HistoryFragment extends Fragment {
 
     private GridView gridView;
+    private TextView monthTitle;
     private Map<LocalDate, Integer> habitCompletionMap;
     private YearMonth currentMonth;
     private DatabaseHelper databaseHelper;
@@ -37,7 +40,11 @@ public class HistoryFragment extends Fragment {
         databaseHelper = new DatabaseHelper(getContext());
 
         gridView = view.findViewById(R.id.calendarGridView);
+        monthTitle = view.findViewById(R.id.monthTitle);  // TextView для отображения месяца
         view.findViewById(R.id.monthTitle);
+
+        Button prevMonthButton = view.findViewById(R.id.prevMonthButton);  // Кнопка для перехода к предыдущему месяцу
+        Button nextMonthButton = view.findViewById(R.id.nextMonthButton);  // Кнопка для перехода к следующему месяцу
 
         // Инициализация данных
         currentMonth = YearMonth.now();
@@ -52,10 +59,24 @@ public class HistoryFragment extends Fragment {
             Toast.makeText(getContext(), "Выполнено привычек: " + completionCount, Toast.LENGTH_SHORT).show();
         });
 
+        // Обработчик кнопки для предыдущего месяца
+        prevMonthButton.setOnClickListener(v -> {
+            currentMonth = currentMonth.minusMonths(1);
+            updateCalendar();
+        });
+
+        // Обработчик кнопки для следующего месяца
+        nextMonthButton.setOnClickListener(v -> {
+            currentMonth = currentMonth.plusMonths(1);
+            updateCalendar();
+        });
+
         return view;
     }
 
     private void updateCalendar() {
+        // Обновляем заголовок с текущим месяцем
+        monthTitle.setText(getMonthTitle(currentMonth));
         // Генерация списка дней месяца
         List<DayData> days = new ArrayList<>();
         int totalDays = currentMonth.lengthOfMonth();
@@ -69,6 +90,12 @@ public class HistoryFragment extends Fragment {
         // Обновление адаптера
         CalendarAdapter adapter = new CalendarAdapter(getContext(), days);
         gridView.setAdapter(adapter);
+    }
+
+    private String getMonthTitle(YearMonth yearMonth) {
+        // Форматируем название месяца на русском, например: "9 декабря 2024"
+        LocalDate firstDayOfMonth = yearMonth.atDay(1);
+        return firstDayOfMonth.format(java.time.format.DateTimeFormatter.ofPattern("LLLL yyyy", java.util.Locale.forLanguageTag("ru")));
     }
 
     private Map<LocalDate, Integer> loadHabitCompletionData() {
