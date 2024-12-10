@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -139,7 +140,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result != -1;  // Если результат -1, то произошла ошибка
     }
 
+    public void resetDatabase() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            db.execSQL("PRAGMA foreign_keys = OFF;");
+            db.execSQL("DELETE FROM history;");
+            db.execSQL("DELETE FROM sqlite_sequence WHERE name='history';");
+            db.execSQL("DELETE FROM habits;");
+            db.execSQL("DELETE FROM sqlite_sequence WHERE name='habits';");
+            db.execSQL("DELETE FROM users;");
+            db.execSQL("DELETE FROM sqlite_sequence WHERE name='users';");
+            db.execSQL("PRAGMA foreign_keys = ON;");
+            db.setTransactionSuccessful();
 
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
+        }
+    }
 
     public List<Habit> getHabitsByUserId(int userId) {
         List<Habit> habitList = new ArrayList<>();
@@ -270,29 +291,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
         try {
-            // Удаляем привычки пользователя
-            db.delete(HABITS_TABLE, HABITS_USER_ID + " = ?", new String[]{String.valueOf(userId)});
+            // Получаем список ID привычек, принадлежащих пользователю
+            Cursor cursor = db.rawQuery("SELECT id FROM habits WHERE user_id = ?", new String[]{String.valueOf(userId)});
+            List<Integer> habitIds = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                @SuppressLint("Range") int habitId = cursor.getInt(cursor.getColumnIndex("id"));
+                habitIds.add(habitId);
+            }
+            cursor.close();
 
-            // Удаляем связанные записи из истории
-            db.delete(HISTORY_TABLE, HISTORY_HABIT_ID + " IN (SELECT " + HABITS_ID + " FROM " + HABITS_TABLE + " WHERE " + HABITS_USER_ID + " = ?)", new String[]{String.valueOf(userId)});
+            // Удаляем записи из таблицы history, связанные с этими привычками
+            for (int habitId : habitIds) {
+                db.delete("history", "habit_id = ?", new String[]{String.valueOf(habitId)});
+            }
+
+            // Удаляем привычки пользователя
+            db.delete("habits", "user_id = ?", new String[]{String.valueOf(userId)});
 
             // Удаляем пользователя
-            int userDeleted = db.delete(USERS_TABLE, USERS_ID + " = ?", new String[]{String.valueOf(userId)});
+            db.delete("users", "id = ?", new String[]{String.valueOf(userId)});
 
-            if (userDeleted > 0) {
-                db.setTransactionSuccessful(); // Если все успешно удалено
-                return true;
-            } else {
-                return false; // Если пользователя не удалось удалить
-            }
+            db.setTransactionSuccessful();
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         } finally {
             db.endTransaction();
-            db.close();
         }
     }
+
 
     public boolean deleteHistoryRecord(int habitId, String date) {
         SQLiteDatabase db = this.getWritableDatabase();

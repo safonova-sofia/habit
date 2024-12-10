@@ -1,6 +1,10 @@
 package com.example.myapplication;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.example.myapplication.LoginActivity.PREFS_NAME;
+
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -102,8 +106,24 @@ public class HistoryFragment extends Fragment {
         Map<LocalDate, Integer> data = new HashMap<>();
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
 
+        // Загружаем user_id текущего пользователя из SharedPreferences
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        int userId = prefs.getInt("user_id", -1);  // Получаем текущий user_id
+
+        if (userId == -1) {
+            Toast.makeText(getContext(), "Ошибка: пользователь не найден", Toast.LENGTH_SHORT).show();
+            return data; // Возвращаем пустую карту, если user_id не найден
+        }
+
+        // SQL-запрос для выборки данных только текущего пользователя
         Cursor cursor = db.rawQuery(
-                "SELECT date, COUNT(*) FROM history WHERE is_completed = 1 GROUP BY date", null);
+                "SELECT h.date, COUNT(*) " +
+                        "FROM history h " +
+                        "INNER JOIN habits hb ON h.habit_id = hb.id " +
+                        "WHERE h.is_completed = 1 AND hb.user_id = ? " +
+                        "GROUP BY h.date",
+                new String[]{String.valueOf(userId)}
+        );
 
         while (cursor.moveToNext()) {
             @SuppressLint("Range") String dateStr = cursor.getString(cursor.getColumnIndex("date"));
@@ -117,6 +137,7 @@ public class HistoryFragment extends Fragment {
         db.close();
         return data;
     }
+
 
 }
 
